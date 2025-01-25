@@ -1,7 +1,6 @@
 local pax = require('pax')
 local util = require('util')
 
-
 util.clone("git@github.com:harrybrwn/dots.git", {
   depth = 1,
 })
@@ -30,6 +29,10 @@ util.clone("git@github.com:alacritty/alacritty.git", {
   depth = 1,
   branch = "v0.15.0",
 })
+util.clone("git@github.com:antonmedv/fx.git", {
+  depth = 1,
+  branch = "35.0.0",
+})
 
 -- TODO make sure the host has neovim's build dependancies
 --
@@ -57,6 +60,13 @@ local project = pax.project({
     "git",
     "curl",
     "tmux",
+    "jq",
+
+    -- alacritty deps
+    --"libfontconfig1 (>= 2.12.6)",
+    --"libfreetype6 (>= 2.8)",
+    --"libgcc-s1 (>= 4.2)",
+    --"libxcb1 (>= 1.11.1)",
   },
   priority     = pax.Priority.Optional,
   files        = {
@@ -80,9 +90,9 @@ local project = pax.project({
 
 project:merge_deb("./.pax/repos/neovim/build/nvim-linux64.deb")
 project:download_kubectl()
--- project:download_yt_dlp({ release = "2025.1.15" })
-project:add_binary(pax.path.join(project:dir(), "bin/yt-dlp"))
+project:download_yt_dlp({ release = "2025.01.15" })
 project:download_mc()
+util.download_kubeseal(project)
 
 -- fonts
 local fonts = util.download_fonts(project, {
@@ -104,16 +114,20 @@ pax.dl.fetch(
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
 
 -- k3d
-pax.dl.fetch(
+project:download_binary(
   "https://github.com/k3d-io/k3d/releases/download/v5.8.1/k3d-linux-amd64",
-  { out = pax.path.join(project:dir(), "bin", "k3d") })
-project:add_binary(pax.path.join(project:dir(), "bin", "k3d"))
+  "k3d"
+)
 
 -- nvm
-pax.dl.fetch(
+project:download_binary(
   "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh",
-  { out = pax.path.join(project:dir(), "bin", "install-nvm.sh") })
-project:add_binary(pax.path.join(project:dir(), "bin", "install-nvm.sh"))
+  "install-nvm.sh")
+
+-- rust
+project:download_binary("https://sh.rustup.rs", "install-rustup.sh")
+project:download_binary(
+"https://github.com/rust-lang/rust-analyzer/releases/download/2025-01-20/rust-analyzer-x86_64-unknown-linux-gnu.gz")
 
 project:go_build({
   root     = "./.pax/repos/dots",
@@ -121,7 +135,12 @@ project:go_build({
 })
 project:go_build({
   root     = "./.pax/repos/govm",
+  cmd      = "./cmd/govm",
   generate = true,
+})
+project:go_build({
+  root     = ".pax/repos/fx",
+  generate = false,
 })
 project:cargo_build({
   root      = "./.pax/repos/rg",
@@ -167,79 +186,31 @@ project:scdoc({
 
 project:add_file(
 -- govm
-  {
-    src  = ".pax/repos/govm/release/completion/bash/govm",
-    dst  = "/usr/share/bash-completion/completions/govm",
-    mode = pax.octal("0644"),
-  },
-  {
-    src  = ".pax/repos/govm/release/completion/zsh/_govm",
-    dst  = "/usr/share/zsh/vendor-completions/_govm",
-    mode = pax.octal("0644"),
-  },
-  {
-    src  = ".pax/repos/govm/release/completion/fish/govm.fish",
-    dst  = "/usr/share/fish/vendor_completions.d/govm.fish",
-    mode = pax.octal("0644"),
-  },
+  util.bash_comp(".pax/repos/govm/release/completion/bash/govm"),
+  util.zsh_comp(".pax/repos/govm/release/completion/zsh/_govm"),
+  util.fish_comp(".pax/repos/govm/release/completion/fish/govm.fish"),
   {
     src  = ".pax/repos/govm/release/man/",
     dst  = "/usr/share/man/man1/",
     mode = pax.octal("0644"),
   },
   -- dots
-  {
-    src  = ".pax/repos/dots/release/completion/bash/dots",
-    dst  = "/usr/share/bash-completion/completions/dots",
-    mode = pax.octal("0644"),
-  },
-  {
-    src  = ".pax/repos/dots/release/completion/zsh/_dots",
-    dst  = "/usr/share/zsh/vendor-completions/_dots",
-    mode = pax.octal("0644"),
-  },
-  {
-    src  = ".pax/repos/dots/release/completion/fish/dots.fish",
-    dst  = "/usr/share/fish/vendor_completions.d/dots.fish",
-    mode = pax.octal("0644"),
-  },
+  util.bash_comp(".pax/repos/dots/release/completion/bash/dots"),
+  util.zsh_comp(".pax/repos/dots/release/completion/zsh/_dots"),
+  util.fish_comp(".pax/repos/dots/release/completion/fish/dots.fish"),
   {
     src  = ".pax/repos/dots/release/man/",
     dst  = "/usr/share/man/man1/",
     mode = pax.octal("0644"),
   },
   -- eza
-  {
-    src  = ".pax/repos/eza/completions/bash/eza",
-    dst  = "/usr/share/bash-completion/completions/eza",
-    mode = pax.octal("0644"),
-  },
-  {
-    src  = ".pax/repos/eza/completions/zsh/_eza",
-    dst  = "/usr/share/zsh/vendor-completions/_eza",
-    mode = pax.octal("0644"),
-  },
-  {
-    src  = ".pax/repos/eza/completions/fish/eza.fish",
-    dst  = "/usr/share/fish/vendor_completions.d/eza.fish",
-    mode = pax.octal("0644"),
-  },
+  util.bash_comp(".pax/repos/eza/completions/bash/eza"),
+  util.zsh_comp(".pax/repos/eza/completions/zsh/_eza"),
+  util.fish_comp(".pax/repos/eza/completions/fish/eza.fish"),
   -- alacritty
-  {
-    src = ".pax/repos/alacritty/extra/completions/alacritty.bash",
-    dst = "/usr/share/bash-completion/completions/alacritty",
-    mode = pax.octal("0644"),
-  },
-  {
-    src = ".pax/repos/alacritty/extra/completions/_alacritty",
-    dst = "/usr/share/zsh/vendor-completions/_alacritty",
-    mode = pax.octal("0644"),
-  },
-  {
-    src = ".pax/repos/alacritty/extra/completions/alacritty.fish",
-    dst = "/usr/share/fish/vendor_completions.d/alacritty.fish",
-    mode = pax.octal("0644"),
-  },
+  util.bash_comp(".pax/repos/alacritty/extra/completions/alacritty.bash", "alacritty"),
+  util.zsh_comp(".pax/repos/alacritty/extra/completions/_alacritty"),
+  util.fish_comp(".pax/repos/alacritty/extra/completions/alacritty.fish"),
   {
     src = ".pax/repos/alacritty/extra/linux/Alacritty.desktop",
     dst = "/usr/share/applications/Alacritty.desktop",
@@ -265,6 +236,6 @@ project:add_file(
 )
 
 -- add ourselves
-project:add_binary(pax.path.join(os.getenv("HOME"), ".cargo/bin/pax"))
+project:add_binary(pax.os.which("pax"))
 
 project:finish()

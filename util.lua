@@ -115,20 +115,57 @@ function M.download_fonts(project, names)
   return dir
 end
 
-function M.test()
-  local repo = "git@github.com:eza-community/eza.git"
-  local opts = cloneopts(repo, {
-    dest   = ".pax/repos/eeeza",
-    depth  = 1,
-    branch = "v0.20.18",
-  })
-  pax.print(opts)
-  pax.print(cloneopts(repo))
-  pax.print(cloneopts(repo, {
-    -- dest = "./.pax/repos/easya",
-    -- dest = ".pax/repos/easya",
-    dest = "easy"
-  }))
+function M.download_kubeseal(project, version)
+  local v = version or "0.28.0"
+  local url = "https://github.com/bitnami-labs/sealed-secrets/releases/download/v" ..
+      v .. "/kubeseal-" .. v .. "-linux-amd64.tar.gz"
+  local dir = pax.path.join(project:dir(), "kubeseal", v)
+  pax.fs.mkdir_all(dir)
+  pax.dl.fetch(url, { out = pax.path.join(dir, "kubeseal.tar.gz") })
+  pax.os.exec(
+    "tar",
+    {
+      "-C", pax.path.join(project:dir(), "bin/"),
+      "-xvzf",
+      pax.path.join(dir, "kubeseal.tar.gz"),
+      "kubeseal"
+    }
+  )
+  project:add_binary(pax.path.join(project:dir(), "bin", "kubeseal"))
 end
+
+local bash_comp_dir = "/usr/share/bash-completion/completions"
+local zsh_comp_dir = "/usr/share/zsh/vendor-completions"
+local fish_comp_dir = "/usr/share/fish/vendor_completions.d"
+
+--- @param src string
+--- @param dst string
+--- @param dstname? string
+--- @return pax.File
+local function comp(src, dst, dstname)
+  if dstname == nil then
+    dstname = pax.path.basename(src)
+  end
+  return {
+    src = src,
+    dst = pax.path.join(dst, dstname),
+    mode = pax.octal("0644"),
+  }
+end
+
+--- @param path string
+--- @param dstname? string
+--- @return pax.File
+function M.bash_comp(path, dstname) return comp(path, bash_comp_dir, dstname) end
+
+--- @param path string
+--- @param dstname? string
+--- @return pax.File
+function M.zsh_comp(path, dstname) return comp(path, zsh_comp_dir, dstname) end
+
+--- @param path string
+--- @param dstname? string
+--- @return pax.File
+function M.fish_comp(path, dstname) return comp(path, fish_comp_dir, dstname) end
 
 return M
