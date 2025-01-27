@@ -67,6 +67,10 @@ local project = pax.project({
     --"libfreetype6 (>= 2.8)",
     --"libgcc-s1 (>= 4.2)",
     --"libxcb1 (>= 1.11.1)",
+
+    -- neovim deps
+    "libc6 (>= 2.34)",
+    "libgcc-s1 (>= 3.4)",
   },
   priority     = pax.Priority.Optional,
   files        = {
@@ -92,19 +96,13 @@ project:merge_deb("./.pax/repos/neovim/build/nvim-linux64.deb")
 project:download_kubectl()
 project:download_yt_dlp({ release = "2025.01.15" })
 project:download_mc()
+util.download_sccache(project)
 util.download_kubeseal(project)
-
--- fonts
-local fonts = util.download_fonts(project, {
+util.download_fonts(project, {
   "RobotoMono",
   "LiberationMono",
   "FiraMono",
   "SourceCodePro",
-})
-project:add_files({
-  src = fonts .. "/",
-  dst = "/usr/share/fonts/truetype",
-  mode = pax.octal("0644"),
 })
 
 -- k9s
@@ -112,22 +110,21 @@ pax.dl.fetch(
   "https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb",
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
-
+pax.dl.fetch(
+  "https://github.com/bootandy/dust/releases/download/v1.1.1/du-dust_1.1.1-1_amd64.deb",
+  { out = pax.path.join(project:dir(), "tmp", "dust.deb") })
+project:merge_deb(pax.path.join(project:dir(), "tmp", "dust.deb"))
 -- k3d
 project:download_binary(
   "https://github.com/k3d-io/k3d/releases/download/v5.8.1/k3d-linux-amd64",
   "k3d"
 )
-
 -- nvm
 project:download_binary(
   "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh",
   "install-nvm.sh")
-
 -- rust
 project:download_binary("https://sh.rustup.rs", "install-rustup.sh")
-project:download_binary(
-"https://github.com/rust-lang/rust-analyzer/releases/download/2025-01-20/rust-analyzer-x86_64-unknown-linux-gnu.gz")
 
 project:go_build({
   root     = "./.pax/repos/dots",
@@ -144,17 +141,17 @@ project:go_build({
 })
 project:cargo_build({
   root      = "./.pax/repos/rg",
-  verbosity = 1,
+  verbosity = 0,
   features  = { "pcre2" },
 })
 util.ripgrep_assets(project, ".pax/repos/rg") -- build and add completion/man
 project:cargo_build({
   root      = ".pax/repos/tokei",
-  verbosity = 1,
+  verbosity = 0,
 })
 project:cargo_build({
   root      = ".pax/repos/eza",
-  verbosity = 1,
+  verbosity = 0,
 })
 
 -- requires:
@@ -164,24 +161,20 @@ project:cargo_build({
   verbosity = 1,
 })
 project:scdoc({
-  input    = ".pax/repos/alacritty/extra/man/alacritty.1.scd",
-  output   = "man1/alacritty.1",
-  compress = false,
+  input  = ".pax/repos/alacritty/extra/man/alacritty.1.scd",
+  output = "man1/alacritty.1",
 })
 project:scdoc({
-  input    = ".pax/repos/alacritty/extra/man/alacritty-msg.1.scd",
-  output   = "man1/alacritty-msg.1",
-  compress = false,
+  input  = ".pax/repos/alacritty/extra/man/alacritty-msg.1.scd",
+  output = "man1/alacritty-msg.1",
 })
 project:scdoc({
-  input    = ".pax/repos/alacritty/extra/man/alacritty.5.scd",
-  output   = "man5/alacritty.5",
-  compress = false
+  input  = ".pax/repos/alacritty/extra/man/alacritty.5.scd",
+  output = "man5/alacritty.5",
 })
 project:scdoc({
-  input    = ".pax/repos/alacritty/extra/man/alacritty-bindings.5.scd",
-  output   = "man5/alacritty-bindings.5",
-  compress = false
+  input  = ".pax/repos/alacritty/extra/man/alacritty-bindings.5.scd",
+  output = "man5/alacritty-bindings.5",
 })
 
 project:add_file(
