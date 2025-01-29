@@ -2,15 +2,16 @@ local pax = require('pax')
 local util = require('util')
 
 for _, spec in pairs({
-  { repo = "git@github.com:harrybrwn/dots.git",      branch = "main" },
-  { repo = "git@github.com:harrybrwn/govm.git",      branch = "main" },
-  { repo = "git@github.com:BurntSushi/ripgrep.git",  branch = "14.1.1",  dest = "rg" },
-  { repo = "git@github.com:XAMPPRocky/tokei.git",    branch = "v12.1.2" },
-  { repo = "git@github.com:eza-community/eza.git",   branch = "v0.20.18" },
-  { repo = "git@github.com:neovim/neovim.git",       branch = 'v0.10.3' },
-  { repo = "git@github.com:alacritty/alacritty.git", branch = "v0.15.0" },
-  { repo = "git@github.com:antonmedv/fx.git",        branch = "35.0.0" },
-  { repo = "git@github.com:dandavison/delta.git",    branch = "0.18.2" },
+  { repo = "git@github.com:harrybrwn/dots.git",          branch = "main" },
+  { repo = "git@github.com:harrybrwn/govm.git",          branch = "main" },
+  { repo = "git@github.com:BurntSushi/ripgrep.git",      branch = "14.1.1",  dest = "rg" },
+  { repo = "git@github.com:XAMPPRocky/tokei.git",        branch = "v12.1.2" },
+  { repo = "git@github.com:eza-community/eza.git",       branch = "v0.20.18" },
+  { repo = "git@github.com:neovim/neovim.git",           branch = 'v0.10.3' },
+  { repo = "git@github.com:alacritty/alacritty.git",     branch = "v0.15.0" },
+  { repo = "git@github.com:antonmedv/fx.git",            branch = "35.0.0" },
+  { repo = "git@github.com:dandavison/delta.git",        branch = "0.18.2" },
+  { repo = "git@github.com:cykerway/complete-alias.git", branch = "master" },
 }) do
   pax.log("cloning " .. spec.repo)
   util.clone(spec.repo, {
@@ -195,6 +196,12 @@ project:add_files({
   util.bash_comp(".pax/repos/delta/etc/completion/completion.bash", "delta"),
   util.zsh_comp(".pax/repos/delta/etc/completion/completion.zsh", "_delta"),
   util.fish_comp(".pax/repos/delta/etc/completion/completion.fish", "delta.fish"),
+  -- complete-alias
+  {
+    src  = ".pax/repos/complete-alias/complete_alias",
+    dst  = "/usr/share/complete-alias/complete_alias",
+    mode = pax.octal("0644"),
+  },
 })
 
 -- add ourselves
