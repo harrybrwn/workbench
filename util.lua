@@ -14,7 +14,7 @@ end
 --- @return pax.GitCloneOpts
 local function cloneopts(repo, opts)
 	if opts == nil then
-		opts = {}
+		opts = { repo = repo }
 	end
 	if opts.dest ~= nil then
 		if not string.find(opts.dest, "^(%.?/?)(%.pax/repos)") then
@@ -24,11 +24,16 @@ local function cloneopts(repo, opts)
 		local name = string.gsub(basename(repo), ".git", "")
 		opts.dest = pax.path.join(".pax/repos", name)
 	end
+	if opts.repo == nil then
+		opts.repo = repo
+	end
 	return opts
 end
 
 local M = {}
 
+--- @param project pax.Project
+--- @param dir string
 function M.ripgrep_assets(project, dir)
 	local bin  = pax.path.join(dir, "target/release/rg")
 	local bash = pax.path.join(dir, "deployment/deb/complete/rg.bash")
@@ -37,20 +42,14 @@ function M.ripgrep_assets(project, dir)
 	local man  = pax.path.join(dir, "deployment/deb/rg.1")
 	pax.fs.mkdir_all(pax.path.join(dir, "deployment/deb/complete"))
 	if not pax.fs.exists(man) and not pax.fs.exists(bash) and not pax.fs.exists(zsh) then
-		-- pax.sh(table.concat({
-		-- 	bin .. " --generate complete-bash > " .. bash,
-		-- 	bin .. " --generate complete-zsh > " .. zsh,
-		-- 	bin .. " --generate complete-fish > " .. fish,
-		-- 	bin .. " --generate man > " .. man,
-		-- }, "\n"))
 		pax.os.exec(bin, { "--generate", "complete-bash" }, { stdout_file = bash })
 		pax.os.exec(bin, { "--generate", "complete-zsh" }, { stdout_file = zsh })
 		pax.os.exec(bin, { "--generate", "complete-fish" }, { stdout_file = fish })
 		pax.os.exec(bin, { "--generate", "man" }, { stdout_file = man })
 	end
 
-	project:add_files(
-		M.bash_comp(bash),
+	project:add_files({
+		M.bash_comp(bash, "rg"),
 		M.zsh_comp(zsh),
 		M.fish_comp(fish),
 		{
@@ -83,9 +82,11 @@ function M.ripgrep_assets(project, dir)
 			dst  = "/usr/share/doc/ripgrep/FAQ",
 			mode = pax.octal("0644"),
 		}
-	)
+	})
 end
 
+--- @param repo string
+--- @param opts pax.GitCloneOpts
 function M.clone(repo, opts)
 	local o = cloneopts(repo, opts)
 	if pax.fs.exists(opts.dest) then

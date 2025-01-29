@@ -1,38 +1,25 @@
 local pax = require('pax')
 local util = require('util')
 
-util.clone("git@github.com:harrybrwn/dots.git", {
-  depth = 1,
-})
-util.clone("git@github.com:harrybrwn/govm.git", {
-  depth = 1,
-})
-util.clone("git@github.com:BurntSushi/ripgrep.git", {
-  dest   = "rg",
-  depth  = 1,
-  branch = "14.1.1",
-})
-util.clone("git@github.com:XAMPPRocky/tokei.git", {
-  dest   = ".pax/repos/tokei",
-  depth  = 1,
-  branch = "v12.1.2",
-})
-util.clone("git@github.com:eza-community/eza.git", {
-  depth  = 1,
-  branch = "v0.20.18",
-})
-util.clone('git@github.com:neovim/neovim.git', {
-  depth  = 1,
-  branch = 'v0.10.3',
-})
-util.clone("git@github.com:alacritty/alacritty.git", {
-  depth = 1,
-  branch = "v0.15.0",
-})
-util.clone("git@github.com:antonmedv/fx.git", {
-  depth = 1,
-  branch = "35.0.0",
-})
+for _, spec in pairs({
+  { repo = "git@github.com:harrybrwn/dots.git",      branch = "main" },
+  { repo = "git@github.com:harrybrwn/govm.git",      branch = "main" },
+  { repo = "git@github.com:BurntSushi/ripgrep.git",  branch = "14.1.1",  dest = "rg" },
+  { repo = "git@github.com:XAMPPRocky/tokei.git",    branch = "v12.1.2" },
+  { repo = "git@github.com:eza-community/eza.git",   branch = "v0.20.18" },
+  { repo = "git@github.com:neovim/neovim.git",       branch = 'v0.10.3' },
+  { repo = "git@github.com:alacritty/alacritty.git", branch = "v0.15.0" },
+  { repo = "git@github.com:antonmedv/fx.git",        branch = "35.0.0" },
+  { repo = "git@github.com:dandavison/delta.git",    branch = "0.18.2" },
+}) do
+  pax.log("cloning " .. spec.repo)
+  util.clone(spec.repo, {
+    repo   = spec.repo,
+    depth  = 1,
+    branch = spec.branch,
+    dest   = spec.dest,
+  })
+end
 
 -- TODO make sure the host has neovim's build dependancies
 --
@@ -50,27 +37,31 @@ pax.in_dir("./.pax/repos/neovim", function()
 end)
 
 local project = pax.project({
-  name         = "workbench",
   package      = "workbench",
   version      = "0.0.1",
+  section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
   arch         = "amd64",
+  description  = "Harry's basic workbench tools.",
+  homepage     = "https://github.com/harrybrwn/workbench",
   dependencies = {
     "git",
     "curl",
     "tmux",
     "jq",
+    "build-essential",
 
     -- alacritty deps
-    --"libfontconfig1 (>= 2.12.6)",
-    --"libfreetype6 (>= 2.8)",
+    "libfontconfig1 (>= 2.12.6)",
+    "libfreetype6 (>= 2.8)",
+    "libxcb1 (>= 1.11.1)",
+    "libc6 (>= 2.35)",
     --"libgcc-s1 (>= 4.2)",
-    --"libxcb1 (>= 1.11.1)",
 
     -- neovim deps
-    "libc6 (>= 2.34)",
-    "libgcc-s1 (>= 3.4)",
+    --"libc6 (>= 2.35)",
+    --"libgcc-s1 (>= 3.4)",
   },
   priority     = pax.Priority.Optional,
   files        = {
@@ -117,8 +108,7 @@ project:merge_deb(pax.path.join(project:dir(), "tmp", "dust.deb"))
 -- k3d
 project:download_binary(
   "https://github.com/k3d-io/k3d/releases/download/v5.8.1/k3d-linux-amd64",
-  "k3d"
-)
+  "k3d")
 -- nvm
 project:download_binary(
   "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh",
@@ -126,59 +116,34 @@ project:download_binary(
 -- rust
 project:download_binary("https://sh.rustup.rs", "install-rustup.sh")
 
+project:go_build({ root = "./.pax/repos/dots", generate = true })
+project:go_build({ root = ".pax/repos/fx", generate = false })
 project:go_build({
-  root     = "./.pax/repos/dots",
-  generate = true,
+  root            = "./.pax/repos/govm",
+  generate        = true,
+  cmd             = "./cmd/govm",
+  bin_access_mode = pax.octal("4755"),
 })
-project:go_build({
-  root     = "./.pax/repos/govm",
-  cmd      = "./cmd/govm",
-  generate = true,
-})
-project:go_build({
-  root     = ".pax/repos/fx",
-  generate = false,
-})
-project:cargo_build({
-  root      = "./.pax/repos/rg",
-  verbosity = 0,
-  features  = { "pcre2" },
-})
+project:cargo_build({ root = "./.pax/repos/rg", features = { "pcre2" } })
 util.ripgrep_assets(project, ".pax/repos/rg") -- build and add completion/man
-project:cargo_build({
-  root      = ".pax/repos/tokei",
-  verbosity = 0,
-})
-project:cargo_build({
-  root      = ".pax/repos/eza",
-  verbosity = 0,
-})
+project:cargo_build({ root = ".pax/repos/tokei" })
+project:cargo_build({ root = ".pax/repos/eza" })
+project:cargo_build({ root = ".pax/repos/delta" })
 
 -- requires:
 -- $ apt install cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
-project:cargo_build({
-  root      = ".pax/repos/alacritty",
-  verbosity = 1,
-})
-project:scdoc({
-  input  = ".pax/repos/alacritty/extra/man/alacritty.1.scd",
-  output = "man1/alacritty.1",
-})
-project:scdoc({
-  input  = ".pax/repos/alacritty/extra/man/alacritty-msg.1.scd",
-  output = "man1/alacritty-msg.1",
-})
-project:scdoc({
-  input  = ".pax/repos/alacritty/extra/man/alacritty.5.scd",
-  output = "man5/alacritty.5",
-})
-project:scdoc({
-  input  = ".pax/repos/alacritty/extra/man/alacritty-bindings.5.scd",
-  output = "man5/alacritty-bindings.5",
-})
+project:cargo_build({ root = ".pax/repos/alacritty" })
+for _, o in pairs({
+  { i = ".pax/repos/alacritty/extra/man/alacritty.1.scd",          o = "man1/alacritty.1" },
+  { i = ".pax/repos/alacritty/extra/man/alacritty-msg.1.scd",      o = "man1/alacritty-msg.1" },
+  { i = ".pax/repos/alacritty/extra/man/alacritty.5.scd",          o = "man5/alacritty.5" },
+  { i = ".pax/repos/alacritty/extra/man/alacritty-bindings.5.scd", o = "man5/alacritty-bindings.5" },
+}) do
+  project:scdoc({ input = o.i, output = o.o })
+end
 
-project:add_file(
--- govm
+project:add_files({
+  -- govm
   util.bash_comp(".pax/repos/govm/release/completion/bash/govm"),
   util.zsh_comp(".pax/repos/govm/release/completion/zsh/_govm"),
   util.fish_comp(".pax/repos/govm/release/completion/fish/govm.fish"),
@@ -225,10 +190,21 @@ project:add_file(
     dst = "/usr/share/pixmaps/Alacritty.png",
     -- dst = "/usr/share/icons/hicolor/scalable/apps/Alacritty.png",
     mode = pax.octal("0644"),
-  }
-)
+  },
+  -- delta
+  util.bash_comp(".pax/repos/delta/etc/completion/completion.bash", "delta"),
+  util.zsh_comp(".pax/repos/delta/etc/completion/completion.zsh", "_delta"),
+  util.fish_comp(".pax/repos/delta/etc/completion/completion.fish", "delta.fish"),
+})
 
 -- add ourselves
 project:add_binary(pax.os.which("pax"))
+if pax.fs.exists("/usr/share/LuaLS/pax/_meta/pax.lua") then
+  project:add_file {
+    src = "/usr/share/LuaLS/pax/_meta/pax.lua",
+    dst = "/usr/share/LuaLS/pax/_meta/pax.lua",
+    mode = pax.octal("0644"),
+  }
+end
 
 project:finish()
