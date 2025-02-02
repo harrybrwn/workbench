@@ -39,6 +39,7 @@ end)
 
 local project = pax.project({
   package      = "workbench",
+  -- version      = "0.0.1-2",
   version      = "0.0.1",
   section      = "devel",
   author       = pax.git.username(),
@@ -46,42 +47,48 @@ local project = pax.project({
   arch         = "amd64",
   description  = "Harry's basic workbench tools.",
   homepage     = "https://github.com/harrybrwn/workbench",
+  priority     = pax.Priority.Optional,
   dependencies = {
     "git",
     "curl",
     "tmux",
     "jq",
     "build-essential",
+    "rsync",
 
     -- alacritty deps
     "libfontconfig1 (>= 2.12.6)",
     "libfreetype6 (>= 2.8)",
     "libxcb1 (>= 1.11.1)",
-    "libc6 (>= 2.35)",
+    string.format("libc6 (>= %s)", util.libc()),
     --"libgcc-s1 (>= 4.2)",
 
     -- neovim deps
     --"libc6 (>= 2.35)",
     --"libgcc-s1 (>= 3.4)",
   },
-  priority     = pax.Priority.Optional,
+  suggests     = {
+    "helm",
+    "docker-ce",
+    "docker-ce-cli",
+    "containerd.io",
+    "docker-buildx-plugin",
+    "docker-compose-plugin",
+  },
   files        = {
-    {
-      src  = "pax.lua",
-      dst  = "/usr/share/workbench/pax.lua",
-      mode = pax.octal("0644"),
-    },
-    {
-      src  = "util.lua",
-      dst  = "/usr/share/workbench/util.lua",
-      mode = pax.octal("0644"),
-    },
+    { src = "pax.lua",  dst = "/usr/share/workbench/pax.lua",  mode = pax.octal("0644") },
+    { src = "util.lua", dst = "/usr/share/workbench/util.lua", mode = pax.octal("0644") },
+    { src = "mini.lua", dst = "/usr/share/workbench/mini.lua", mode = pax.octal("0644") },
     {
       src  = "README.md",
       dst  = "/usr/share/workbench/README.md",
       mode = pax.octal("0644"),
-    }
+    },
   },
+  scripts      = {
+    preinst = util.contents("scripts/maintainer/preinst"),
+    postrm  = util.contents("scripts/maintainer/postrm"),
+  }
 })
 
 project:merge_deb("./.pax/repos/neovim/build/nvim-linux64.deb")
@@ -102,6 +109,12 @@ pax.dl.fetch(
   "https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb",
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
+pax.dl.fetch(
+  "https://github.com/golangci/golangci-lint/releases/download/v1.63.4/golangci-lint-1.63.4-linux-amd64.deb",
+  { out = pax.path.join(project:dir(), "golangci-lint.deb") })
+project:merge_deb(pax.path.join(project:dir(), "golangci-lint.deb"))
+project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubectx")
+project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubens")
 pax.dl.fetch(
   "https://github.com/bootandy/dust/releases/download/v1.1.1/du-dust_1.1.1-1_amd64.deb",
   { out = pax.path.join(project:dir(), "tmp", "dust.deb") })
@@ -142,6 +155,9 @@ for _, o in pairs({
 }) do
   project:scdoc({ input = o.i, output = o.o })
 end
+
+-- add ourselves
+util.add_pax(project)
 
 project:add_files({
   -- govm
@@ -203,15 +219,5 @@ project:add_files({
     mode = pax.octal("0644"),
   },
 })
-
--- add ourselves
-project:add_binary(pax.os.which("pax"))
-if pax.fs.exists("/usr/share/LuaLS/pax/_meta/pax.lua") then
-  project:add_file {
-    src = "/usr/share/LuaLS/pax/_meta/pax.lua",
-    dst = "/usr/share/LuaLS/pax/_meta/pax.lua",
-    mode = pax.octal("0644"),
-  }
-end
 
 project:finish()

@@ -1,2 +1,4 @@
 .pax/
 dist/
+/pax
+docker-build/

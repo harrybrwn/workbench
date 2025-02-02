@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+set -o functrace
+
+KEYDIR=/etc/apt/keyrings
+
+if [ "$1" = "purge" ]; then
+  rm -f \
+    "${KEYDIR}/helm.gpg" \
+    "${KEYDIR}/helm.gpg" \
+    "${KEYDIR}/opentofu-repo.gpg" \
+    "${KEYDIR}/opentofu.gpg" \
+    "${KEYDIR}/docker.asc"
+  rm -f \
+    /etc/apt/sources.list.d/helm-stable-debian.list \
+    /etc/apt/sources.list.d/opentofu.list \
+    /etc/apt/sources.list.d/docker.list
+fi
+
+# vim: ft=bash ts=2 sw=2 sts=2 expandtab

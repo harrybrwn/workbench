@@ -1,0 +1,9 @@
+/dist/
+/.pax/
+/_dist/
+/.github/
+/pax/target/
+Dockerfile
+docker-bake.hcl
+.dockerignore
+.gitignore

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+set -o functrace
+
+KEYDIR=/etc/apt/keyrings
+if [ ! -d "${KEYDIR}" ]; then
+  mkdir --mode=0755 -p "${KEYDIR}"
+fi
+
+# helm
+curl -fsSL https://baltocdn.com/helm/signing.asc \
+  | gpg --dearmor \
+  | tee "${KEYDIR}/helm.gpg" > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=${KEYDIR}/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" \
+  | tee /etc/apt/sources.list.d/helm-stable-debian.list
+
+# opentofu
+if [ ! -f "${KEYDIR}/opentofu.gpg" ]; then
+  curl -fsSL https://get.opentofu.org/opentofu.gpg \
+    | tee "${KEYDIR}/opentofu.gpg" >/dev/null
+fi
+if [ ! -f "${KEYDIR}/opentofu-repo.gpg" ]; then
+  curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey \
+    | gpg --no-tty --batch --dearmor -o "${KEYDIR}/opentofu-repo.gpg" >/dev/null
+fi
+chmod a+r "${KEYDIR}/opentofu.gpg" "${KEYDIR}/opentofu-repo.gpg"
+echo \
+  "deb [signed-by=${KEYDIR}/opentofu.gpg,${KEYDIR}/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main
+deb-src [signed-by=${KEYDIR}/opentofu.gpg,${KEYDIR}/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | \
+  tee /etc/apt/sources.list.d/opentofu.list
+chmod a+r /etc/apt/sources.list.d/opentofu.list
+
+# docker
+ID="$(. /etc/os-release && echo "$ID")"
+if [ -z "$ID" ]; then
+  echo "Error: cannot find distribution ID from /etc/os-release" >&2
+  exit 1
+fi
+curl -fsSL "https://download.docker.com/linux/$ID/gpg" -o "${KEYDIR}/docker.asc"
+chmod a+r "${KEYDIR}/docker.asc"
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=${KEYDIR}/docker.asc] https://download.docker.com/linux/$ID \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  | tee /etc/apt/sources.list.d/docker.list
+
+# vim: ft=bash ts=2 sw=2 sts=2 expandtab
