@@ -39,7 +39,6 @@ end)
 
 local project = pax.project({
   package      = "workbench",
-  -- version      = "0.0.1-2",
   version      = "0.0.1",
   section      = "devel",
   author       = pax.git.username(),
@@ -55,18 +54,17 @@ local project = pax.project({
     "jq",
     "build-essential",
     "rsync",
-
     -- alacritty deps
     "libfontconfig1 (>= 2.12.6)",
     "libfreetype6 (>= 2.8)",
     "libxcb1 (>= 1.11.1)",
     string.format("libc6 (>= %s)", util.libc()),
-    --"libgcc-s1 (>= 4.2)",
-
-    -- neovim deps
-    --"libc6 (>= 2.35)",
-    --"libgcc-s1 (>= 3.4)",
   },
+  provides     = {
+    "neovim (= 0.10.3)",
+    "alacritty (= 0.15.0)"
+  },
+  conflicts    = { "golangci-lint" },
   suggests     = {
     "helm",
     "docker-ce",
@@ -76,18 +74,14 @@ local project = pax.project({
     "docker-compose-plugin",
   },
   files        = {
-    { src = "pax.lua",  dst = "/usr/share/workbench/pax.lua",  mode = pax.octal("0644") },
-    { src = "util.lua", dst = "/usr/share/workbench/util.lua", mode = pax.octal("0644") },
-    { src = "mini.lua", dst = "/usr/share/workbench/mini.lua", mode = pax.octal("0644") },
-    {
-      src  = "README.md",
-      dst  = "/usr/share/workbench/README.md",
-      mode = pax.octal("0644"),
-    },
+    { src = "pax.lua",    dst = "/usr/share/workbench/pax.lua",    mode = pax.octal("0644") },
+    { src = "util.lua",   dst = "/usr/share/workbench/util.lua",   mode = pax.octal("0644") },
+    { src = "mini.lua",   dst = "/usr/share/workbench/mini.lua",   mode = pax.octal("0644") },
+    { src = "README.md",  dst = "/usr/share/workbench/README.md",  mode = pax.octal("0644") },
   },
   scripts      = {
-    preinst = util.contents("scripts/maintainer/preinst"),
-    postrm  = util.contents("scripts/maintainer/postrm"),
+    preinst = util.readfile("scripts/maintainer/preinst"),
+    postrm  = util.readfile("scripts/maintainer/postrm"),
   }
 })
 

@@ -8,20 +8,20 @@ RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt update && \
     apt -y install \
-    scdoc \
-    build-essential \
-    ninja-build \
-    gettext \
-    cmake \
-    curl  \
-    g++ \
-    pkg-config \
-    libfreetype6-dev \
-    libfontconfig1-dev \
-    libxcb-xfixes0-dev \
-    libxkbcommon-dev \
-    python3
-RUN curl -sSLf https://go.dev/dl/go1.23.5.linux-amd64.tar.gz -o /tmp/go1.23.5.linux-amd64.tar.gz && \
+        scdoc \
+        build-essential \
+        ninja-build \
+        gettext \
+        cmake \
+        curl  \
+        g++ \
+        pkg-config \
+        libfreetype6-dev \
+        libfontconfig1-dev \
+        libxcb-xfixes0-dev \
+        libxkbcommon-dev \
+        python3 && \
+    curl -sSLf https://go.dev/dl/go1.23.5.linux-amd64.tar.gz -o /tmp/go1.23.5.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf /tmp/go1.23.5.linux-amd64.tar.gz && \
     rm /tmp/go1.23.5.linux-amd64.tar.gz
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
@@ -38,17 +38,11 @@ RUN --mount=type=ssh \
     ssh-keyscan github.com >> ~/.ssh/known_hosts && \
     git config --global user.name 'Harry Brown'  && \
     git config --global user.email me@h3y.sh     && \
-    echo 'hello' && \
     git clone \
-        --branch f219aa238651f4e6d82428561d1dda425c59a7ed \
+        --branch main \
         --depth 1 \
         git@github.com:harrybrwn/pax.git /opt/pax
 WORKDIR /opt/pax/
-RUN --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
-    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
-    --mount=type=cache,target=/usr/local/cargo/git/db \
-    --mount=type=cache,target=/opt/pax/target,id=pax-target-${RUST_VERSION}-${DEBIAN_VERSION} \
-    cargo fetch
 RUN --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
     --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
     --mount=type=cache,target=/usr/local/cargo/git/db \
@@ -87,4 +81,6 @@ ENTRYPOINT [ "bash" ]
 
 FROM scratch AS workbench-dist
 ARG DEBIAN_VERSION
-COPY --from=builder /opt/workbench/dist ./${DEBIAN_VERSION}-dist
+COPY --from=builder \
+    /opt/workbench/dist/workbench-v0.0.1_amd64.deb \
+    ./workbench-v0.0.1_${DEBIAN_VERSION}_amd64.deb

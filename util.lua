@@ -198,7 +198,7 @@ function M.fish_comp(path, dstname) return comp(path, fish_comp_dir, dstname) en
 
 --- @param filename string
 --- @return string
-function M.contents(filename)
+function M.readfile(filename)
   local f = io.open(filename, "r")
   if f == nil then
     return ""
