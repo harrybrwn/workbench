@@ -24,7 +24,14 @@ jobs:
         uses: docker/setup-buildx-action@v3
         id: buildx
       - name: Build
-        run: docker buildx bake workbench-dist
+        env:
+          DOCKER_BUILDKIT: '1'
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          eval $(ssh-agent -s)
+          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
+          export DOCKER_BUILDKIT=1
+          docker buildx bake workbench-dist
       - name: Create Release
         run: gh release create ${{ inputs.version }} --latest --generate-notes --title "${{ inputs.version }}" docker-build/*.deb
 
