@@ -26,6 +26,7 @@ jobs:
       - name: Build
         env:
           DOCKER_BUILDKIT: '1'
+          BUILDX_BAKE_ENTITLEMENTS_FS: '0'
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
         run: |
           eval $(ssh-agent -s)
