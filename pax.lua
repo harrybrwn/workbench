@@ -112,13 +112,10 @@ util.download_fonts(project, {
 
 -- k9s
 pax.dl.fetch(
-  "https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb",
+  "https://github.com/derailed/k9s/releases/download/v0.40.5/k9s_linux_amd64.deb",
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
-pax.dl.fetch(
-  "https://github.com/golangci/golangci-lint/releases/download/v1.63.4/golangci-lint-1.63.4-linux-amd64.deb",
-  { out = pax.path.join(project:dir(), "golangci-lint.deb") })
-project:merge_deb(pax.path.join(project:dir(), "golangci-lint.deb"))
+util.add_golangci_lint(project, "1.64.5")
 project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubectx")
 project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubens")
 pax.dl.fetch(
@@ -127,14 +124,11 @@ pax.dl.fetch(
 project:merge_deb(pax.path.join(project:dir(), "tmp", "dust.deb"))
 -- k3d
 project:download_binary(
-  "https://github.com/k3d-io/k3d/releases/download/v5.8.1/k3d-linux-amd64",
+  "https://github.com/k3d-io/k3d/releases/download/v5.8.3/k3d-linux-amd64",
   "k3d")
--- nvm
-project:download_binary(
-  "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh",
-  "install-nvm.sh")
--- rust
-project:download_binary("https://sh.rustup.rs", "install-rustup.sh")
+-- uv (python) https://docs.astral.sh/uv/
+--project:download_binary("https://astral.sh/uv/install.sh", "install-uv.sh")
+util.add_fzf(project, "0.60.2")
 
 project:go_build({ root = "./.pax/repos/dots", generate = true })
 project:go_build({ root = ".pax/repos/fx", generate = false })
@@ -142,7 +136,7 @@ project:go_build({
   root            = "./.pax/repos/govm",
   generate        = true,
   cmd             = "./cmd/govm",
-  bin_access_mode = pax.octal("4755"),
+  bin_access_mode = pax.octal("4755"), -- probably a security issue but oh well lol
 })
 project:cargo_build({ root = "./.pax/repos/rg", features = { "pcre2" } })
 util.ripgrep_assets(project, ".pax/repos/rg") -- build and add completion/man

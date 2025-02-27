@@ -162,6 +162,45 @@ function M.download_sccache(project)
   project:add_binary(pax.path.join(project:dir(), dst))
 end
 
+function M.add_zig(project, version)
+  local url = "https://ziglang.org/download/" .. version .. "/zig-linux-x86_64-" .. version .. ".tar.xz"
+  local out = pax.path.join(project:dir(), "zig.tar.xz")
+  pax.dl.fetch(url, { out = out })
+  pax.os.exec("tar", {
+    "-C",
+    project:dir(),
+    "-xJf",
+    out,
+  })
+  project:add_file {
+    src = pax.path.join(project:dir(), "zig-linux-x86_64-" .. version .. "/"),
+    dst = "/usr/local/zig",
+  }
+end
+
+function M.add_fzf(project, version)
+  local url = "https://github.com/junegunn/fzf/releases/download/v" ..
+      version "/fzf-" .. version .. "-linux_amd64.tar.gz"
+  local out = pax.path.join(project:dir(), "fzf-" .. version .. ".tar.gz")
+  pax.dl.fetch(url, { out = out })
+  pax.os.exec("tar", {
+    "-C", pax.path.join(project:dir(), "bin"),
+    "-xzf", out,
+  })
+  project:add_file {
+    src = pax.path.join(project:dir(), "bin", "fzf"),
+    dst = "/usr/bin/fzf",
+  }
+end
+
+function M.add_golangci_lint(project, version)
+  local url = "https://github.com/golangci/golangci-lint/releases/download/v" ..
+      version .. "/golangci-lint-1.64.5-linux-amd64.deb"
+  local out = pax.path.join(project:dir(), "golangci-lint.deb")
+  pax.dl.fetch(url, { out = out })
+  project:merge_deb(out)
+end
+
 local bash_comp_dir = "/usr/share/bash-completion/completions"
 local zsh_comp_dir = "/usr/share/zsh/vendor-completions"
 local fish_comp_dir = "/usr/share/fish/vendor_completions.d"
