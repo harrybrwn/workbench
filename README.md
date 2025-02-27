@@ -3,4 +3,7 @@ program I created called [pax](https://github.com/harrybrwn/pax).
 
 ## TODO
 
+* Add the [ly](https://github.com/fairyglade/ly) display manager
+    * requires zig 0.13.0
 * Add [jdupes](https://codeberg.org/jbruchon/jdupes).
+* Add [usbimager](https://bztsrc.gitlab.io/usbimager/)

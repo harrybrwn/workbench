@@ -1,0 +1,31 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: "Version tag for the new release."
+        type: string
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.version }}
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v3
+      - name: Setup docker buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+      - name: Build
+        run: docker buildx bake workbench-dist
+      - name: Create Release
+        run: gh release create ${{ inputs.version }} --latest --generate-notes --title "${{ inputs.version }}" docker-build/*.deb
+
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
