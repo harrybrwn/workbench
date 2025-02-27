@@ -6,9 +6,9 @@ for _, spec in pairs({
   { repo = "git@github.com:harrybrwn/govm.git",          branch = "main" },
   { repo = "git@github.com:BurntSushi/ripgrep.git",      branch = "14.1.1",  dest = "rg" },
   { repo = "git@github.com:XAMPPRocky/tokei.git",        branch = "v12.1.2" },
-  { repo = "git@github.com:eza-community/eza.git",       branch = "v0.20.18" },
-  { repo = "git@github.com:neovim/neovim.git",           branch = 'v0.10.3' },
-  { repo = "git@github.com:alacritty/alacritty.git",     branch = "v0.15.0" },
+  { repo = "git@github.com:eza-community/eza.git",       branch = "v0.20.22" },
+  { repo = "git@github.com:neovim/neovim.git",           branch = 'v0.10.4' },
+  { repo = "git@github.com:alacritty/alacritty.git",     branch = "v0.15.1" },
   { repo = "git@github.com:antonmedv/fx.git",            branch = "35.0.0" },
   { repo = "git@github.com:dandavison/delta.git",        branch = "0.18.2" },
   { repo = "git@github.com:cykerway/complete-alias.git", branch = "master" },
@@ -39,7 +39,7 @@ end)
 
 local project = pax.project({
   package      = "workbench",
-  version      = "0.0.1",
+  version      = "0.0.1~alpha1",
   section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
@@ -85,9 +85,9 @@ local project = pax.project({
   }
 })
 
-project:merge_deb("./.pax/repos/neovim/build/nvim-linux64.deb")
+project:merge_deb("./.pax/repos/neovim/build/nvim-linux-x86_64.deb")
 project:download_kubectl()
-project:download_yt_dlp({ release = "2025.01.15" })
+project:download_yt_dlp({ release = "2025.02.19" })
 project:download_mc()
 util.download_sccache(project)
 util.download_kubeseal(project)
