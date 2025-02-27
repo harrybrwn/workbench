@@ -76,10 +76,20 @@ local project = pax.project({
     "docker-compose-plugin",
   },
   files        = {
-    { src = "pax.lua",    dst = "/usr/share/workbench/pax.lua",    mode = pax.octal("0644") },
-    { src = "util.lua",   dst = "/usr/share/workbench/util.lua",   mode = pax.octal("0644") },
-    { src = "mini.lua",   dst = "/usr/share/workbench/mini.lua",   mode = pax.octal("0644") },
-    { src = "README.md",  dst = "/usr/share/workbench/README.md",  mode = pax.octal("0644") },
+    { src = "pax.lua",   dst = "/usr/share/workbench/pax.lua",   mode = pax.octal("0644") },
+    { src = "util.lua",  dst = "/usr/share/workbench/util.lua",  mode = pax.octal("0644") },
+    { src = "mini.lua",  dst = "/usr/share/workbench/mini.lua",  mode = pax.octal("0644") },
+    { src = "README.md", dst = "/usr/share/workbench/README.md", mode = pax.octal("0644") },
+    {
+      src = "./scripts/install-nvm.sh",
+      dst = "/usr/local/bin/install-nvm",
+      mode = pax.octal("0755"),
+    },
+    {
+      src = "./scripts/install-rustup.sh",
+      dst = "/usr/local/bin/install-rustup",
+      mode = pax.octal("0755"),
+    },
   },
   scripts      = {
     preinst = util.readfile("scripts/maintainer/preinst"),

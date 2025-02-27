@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+set -euo pipefail
+
+if [ -L /usr/bin/x-terminal-emulator ]; then
+  update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 40
+fi
