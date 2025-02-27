@@ -180,7 +180,7 @@ end
 
 function M.add_fzf(project, version)
   local url = "https://github.com/junegunn/fzf/releases/download/v" ..
-      version "/fzf-" .. version .. "-linux_amd64.tar.gz"
+      version .. "/fzf-" .. version .. "-linux_amd64.tar.gz"
   local out = pax.path.join(project:dir(), "fzf-" .. version .. ".tar.gz")
   pax.dl.fetch(url, { out = out })
   pax.os.exec("tar", {
@@ -195,7 +195,7 @@ end
 
 function M.add_golangci_lint(project, version)
   local url = "https://github.com/golangci/golangci-lint/releases/download/v" ..
-      version .. "/golangci-lint-1.64.5-linux-amd64.deb"
+      version .. "/golangci-lint-" .. version .. "-linux-amd64.deb"
   local out = pax.path.join(project:dir(), "golangci-lint.deb")
   pax.dl.fetch(url, { out = out })
   project:merge_deb(out)
