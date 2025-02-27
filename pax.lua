@@ -54,6 +54,8 @@ local project = pax.project({
     "jq",
     "build-essential",
     "rsync",
+    "htop",
+    "dnsutils", -- dig
     -- alacritty deps
     "libfontconfig1 (>= 2.12.6)",
     "libfreetype6 (>= 2.8)",
