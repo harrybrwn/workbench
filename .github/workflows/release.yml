@@ -34,6 +34,8 @@ jobs:
           export DOCKER_BUILDKIT=1
           docker buildx bake workbench-dist
       - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: gh release create ${{ inputs.version }} --latest --generate-notes --title "${{ inputs.version }}" docker-build/*.deb
 
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
