@@ -42,12 +42,14 @@ function M.ripgrep_assets(project, dir)
   local man  = pax.path.join(dir, "deployment/deb/rg.1")
   pax.fs.mkdir_all(pax.path.join(dir, "deployment/deb/complete"))
   if not pax.fs.exists(man) and not pax.fs.exists(bash) and not pax.fs.exists(zsh) then
+    pax.log("generating ripgrep completion files")
     pax.os.exec(bin, { "--generate", "complete-bash" }, { stdout_file = bash })
     pax.os.exec(bin, { "--generate", "complete-zsh" }, { stdout_file = zsh })
     pax.os.exec(bin, { "--generate", "complete-fish" }, { stdout_file = fish })
     pax.os.exec(bin, { "--generate", "man" }, { stdout_file = man })
   end
 
+  pax.log("adding ripgrep extra files")
   project:add_files({
     M.bash_comp(bash, "rg"),
     M.zsh_comp(zsh),
@@ -85,14 +87,15 @@ function M.ripgrep_assets(project, dir)
   })
 end
 
---- @param repo string
 --- @param opts pax.GitCloneOpts
-function M.clone(repo, opts)
-  local o = cloneopts(repo, opts)
+function M.clone(opts)
+  local o = cloneopts(opts.repo, opts)
   if pax.fs.exists(opts.dest) then
+    pax.log(opts.repo .. " already cloned")
     return
   end
-  pax.git.clone(repo, o)
+  pax.log("cloning " .. opts.repo)
+  pax.git.clone(opts.repo, o)
 end
 
 function M.download_fonts(project, names)
@@ -107,9 +110,10 @@ function M.download_fonts(project, names)
     end
     local url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/" .. name .. ".zip"
     pax.dl.fetch(url, { out = zipfile })
-    pax.exec("unzip", { "-o", "-d", dir, zipfile })
+    pax.exec("unzip", { "-q", "-o", "-d", dir, zipfile })
     ::continue::
   end
+  pax.log("adding custom fonts")
   project:add_file({
     src = dir .. "/",
     dst = "/usr/share/fonts/truetype",
@@ -133,6 +137,7 @@ function M.download_kubeseal(project, version)
       "kubeseal"
     }
   )
+  pax.log("adding kubeseal")
   project:add_binary(pax.path.join(project:dir(), "bin", "kubeseal"))
 end
 
@@ -147,6 +152,7 @@ function M.download_rust_analyzer(project)
   end
   local blob = pax.path.join(project:dir(), "bin", string.gsub(base, "%.gz", ""))
   pax.dl.fetch(url, { out = blob, compression = 1 })
+  pax.log("adding rust-analyzer")
   project:add_binary(pax.path.join(project:dir(), "bin", "rust-analyzer"))
 end
 
@@ -159,6 +165,7 @@ function M.download_sccache(project)
   pax.dl.fetch(url, { out = out })
   local dst = "sccache-v" .. v .. "-x86_64-unknown-linux-musl/sccache"
   pax.os.exec("tar", { "-C", project:dir(), "-xzf", out, dst })
+  pax.log("adding sccache")
   project:add_binary(pax.path.join(project:dir(), dst))
 end
 
@@ -172,6 +179,7 @@ function M.add_zig(project, version)
     "-xJf",
     out,
   })
+  pax.log("adding zig")
   project:add_file {
     src = pax.path.join(project:dir(), "zig-linux-x86_64-" .. version .. "/"),
     dst = "/usr/local/zig",
@@ -187,6 +195,7 @@ function M.add_fzf(project, version)
     "-C", pax.path.join(project:dir(), "bin"),
     "-xzf", out,
   })
+  pax.log("adding fzf")
   project:add_file {
     src = pax.path.join(project:dir(), "bin", "fzf"),
     dst = "/usr/bin/fzf",
@@ -198,6 +207,7 @@ function M.add_golangci_lint(project, version)
       version .. "/golangci-lint-" .. version .. "-linux-amd64.deb"
   local out = pax.path.join(project:dir(), "golangci-lint.deb")
   pax.dl.fetch(url, { out = out })
+  pax.log("adding golangci-lint")
   project:merge_deb(out)
 end
 
@@ -251,6 +261,7 @@ end
 function M.add_pax(project)
   local p = pax.path.join(project:dir(), "tmp", "pax-types.lua")
   pax.os.exec("pax", { "generate" }, { stdout_file = p })
+  pax.log("adding pax (self binary)")
   project:add_binary(pax.os.which("pax"))
   project:add_file {
     src = p,

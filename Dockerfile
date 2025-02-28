@@ -24,15 +24,15 @@ RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     curl -sSLf https://go.dev/dl/go1.23.5.linux-amd64.tar.gz -o /tmp/go1.23.5.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf /tmp/go1.23.5.linux-amd64.tar.gz && \
     rm /tmp/go1.23.5.linux-amd64.tar.gz
-RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
-    --mount=type=cache,target=/usr/local/cargo/git/db \
-    cargo install sccache
+# RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
+#     --mount=type=cache,target=/usr/local/cargo/git/db \
+#     cargo install sccache
 ENV SCCACHE_DIR=/opt/sccache/${RUST_VERSION} \
     SCCACHE_CACHE_SIZE="2G" \
-    RUSTC_WRAPPER="/usr/local/cargo/bin/sccache" \
     GOCACHE="/var/cache/go/build" \
     GOMODCACHE="/var/cache/go/pkg/mod" \
     PATH="/usr/local/go/bin:$PATH"
+#ENV RUSTC_WRAPPER="/usr/local/cargo/bin/sccache"
 RUN --mount=type=ssh \
     mkdir ~/.ssh/ && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts && \
@@ -51,19 +51,15 @@ RUN --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
     cp target/release/pax /usr/local/bin/pax
 WORKDIR /opt/workbench
 COPY *.lua .
-COPY README.md scripts ./
+COPY README.md .
+COPY scripts scripts
 RUN --mount=type=ssh \
     --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
     --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
     --mount=type=cache,target=/usr/local/cargo/git/db      \
     --mount=type=cache,target=/var/cache/go                \
     --mount=type=cache,target=/opt/workbench/.pax/repos,id=pax-repos-${DEBIAN_VERSION} \
-    echo 'here' && \
-    /usr/local/bin/pax && \
-    sccache --show-stats && \
-    ls -la ./ && \
-    ls -la ./dist/
-RUN du -sh ./dist
+    /usr/local/bin/pax
 
 FROM ubuntu:24.04 AS workbench
 ARG DEBIAN_VERSION
@@ -82,5 +78,5 @@ ENTRYPOINT [ "bash" ]
 FROM scratch AS workbench-dist
 ARG DEBIAN_VERSION
 COPY --from=builder \
-    /opt/workbench/dist/workbench-v0.0.1_amd64.deb \
+    /opt/workbench/dist/workbench-*_amd64.deb \
     ./workbench-v0.0.1_${DEBIAN_VERSION}_amd64.deb

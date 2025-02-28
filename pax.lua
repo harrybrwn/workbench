@@ -13,8 +13,7 @@ for _, spec in pairs({
   { repo = "git@github.com:dandavison/delta.git",        branch = "0.18.2" },
   { repo = "git@github.com:cykerway/complete-alias.git", branch = "master" },
 }) do
-  pax.log("cloning " .. spec.repo)
-  util.clone(spec.repo, {
+  util.clone({
     repo   = spec.repo,
     depth  = 1,
     branch = spec.branch,
@@ -29,10 +28,12 @@ end
 -- See BUILD.md
 pax.in_dir("./.pax/repos/neovim", function()
   if pax.fs.exists("build/nvim-linux64.deb") then
+    pax.log("neovim already built")
     return
   end
   pax.sh [[ make CMAKE_BUILD_TYPE=Release ]]
   pax.in_dir("./build", function()
+    pax.log("building neovim")
     pax.sh("cpack -G DEB")
   end)
 end)
@@ -116,6 +117,7 @@ pax.dl.fetch(
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
 util.add_golangci_lint(project, "1.64.5")
+pax.log("downloading kubectx")
 project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubectx")
 project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubens")
 pax.dl.fetch(

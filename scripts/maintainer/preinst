@@ -45,4 +45,18 @@ echo \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
   | tee /etc/apt/sources.list.d/docker.list
 
+# github
+wget -nv -O- https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+  | tee "${KEYDIR}/githubcli-archive-keyring.gpg" > /dev/null
+chmod go+r "${KEYDIR}/githubcli-archive-keyring.gpg"
+echo "deb [arch=$(dpkg --print-architecture) signed-by=${KEYDIR}/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+  | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+# hashicorp (terraform/vault/consul)
+wget -O- https://apt.releases.hashicorp.com/gpg \
+  | gpg --dearmor \
+  | tee ${KEYDIR}/hashicorp-archive-keyring.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+  | tee /etc/apt/sources.list.d/hashicorp.list
+
 # vim: ft=bash ts=2 sw=2 sts=2 expandtab
