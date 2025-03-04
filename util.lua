@@ -211,6 +211,46 @@ function M.add_golangci_lint(project, version)
   project:merge_deb(out)
 end
 
+function M.add_aws(project)
+  local zip = pax.path.join(project:dir(), "awscli-exe-linux-x86_64.zip")
+  local dir = pax.path.join(project:dir(), "aws-cli")
+  local root_install_dir = pax.path.join(project:dir(), "aws")
+  pax.dl.fetch("https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip", { out = zip })
+  pax.os.exec("mkdir", { "-p", pax.path.join(dir, "usr/local/aws-cli"), pax.path.join(dir, "usr/bin") })
+  pax.os.exec("unzip", { zip, "-d", dir })
+  pax.sh(
+    "INSTALLER_DIR=" .. pax.path.join(dir, "aws") .. "\n" ..
+    "ROOT_INSTALL_DIR=" .. root_install_dir .. "\n" ..
+    [[
+EXE_NAME="aws"
+COMPLETER_EXE_NAME="aws_completer"
+INSTALLER_DIST_DIR="$INSTALLER_DIR/dist"
+INSTALLER_EXE="$INSTALLER_DIST_DIR/$EXE_NAME"
+AWS_EXE_VERSION=$($INSTALLER_EXE --version | cut -d ' ' -f 1 | cut -d '/' -f 2)
+
+INSTALL_DIR="$ROOT_INSTALL_DIR/v2/$AWS_EXE_VERSION"
+INSTALL_DIST_DIR="$INSTALL_DIR/dist"
+INSTALL_BIN_DIR="$INSTALL_DIR/bin"
+INSTALL_AWS_EXE="$INSTALL_BIN_DIR/$EXE_NAME"
+INSTALL_AWS_COMPLETER_EXE="$INSTALL_BIN_DIR/$COMPLETER_EXE_NAME"
+
+CURRENT_INSTALL_DIR="$ROOT_INSTALL_DIR/v2/current"
+CURRENT_AWS_EXE="$CURRENT_INSTALL_DIR/bin/$EXE_NAME"
+CURRENT_AWS_COMPLETER_EXE="$CURRENT_INSTALL_DIR/bin/$COMPLETER_EXE_NAME"
+
+BIN_AWS_EXE="$BIN_DIR/$EXE_NAME"
+BIN_AWS_COMPLETER_EXE="$BIN_DIR/$COMPLETER_EXE_NAME"
+
+echo "mkdir $INSTALL_DIR"
+echo cp -r "$INSTALLER_DIST_DIR" "$INSTALL_DIST_DIR"
+echo mkdir -p "$INSTALL_BIN_DIR"
+echo ln -s "../dist/$EXE_NAME" "$INSTALL_AWS_EXE"
+echo ln -s "../dist/$COMPLETER_EXE_NAME" "$INSTALL_AWS_COMPLETER_EXE"
+echo ln -snf "$INSTALL_DIR" "$CURRENT_INSTALL_DIR"
+]]
+  )
+end
+
 local bash_comp_dir = "/usr/share/bash-completion/completions"
 local zsh_comp_dir = "/usr/share/zsh/vendor-completions"
 local fish_comp_dir = "/usr/share/fish/vendor_completions.d"

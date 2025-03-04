@@ -76,7 +76,8 @@ EOF
 ENTRYPOINT [ "bash" ]
 
 FROM scratch AS workbench-dist
+ARG VERSION
 ARG DEBIAN_VERSION
 COPY --from=builder \
     /opt/workbench/dist/workbench-*_amd64.deb \
-    ./workbench-v0.0.1_${DEBIAN_VERSION}_amd64.deb
+    ./workbench-${VERSION}_${DEBIAN_VERSION}_amd64.deb

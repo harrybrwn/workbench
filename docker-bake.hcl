@@ -2,10 +2,11 @@ variable "VERSION" {
     default = "0.0.1"
 }
 
-#group "default" {
-#    targets = [
-#    ]
-#}
+group "default" {
+    targets = [
+        "workbench",
+    ]
+}
 
 target "workbench" {
     matrix = {
@@ -23,6 +24,7 @@ target "workbench" {
         "harrybrwn/workbench:${VERSION}-${item.DEBIAN_VERSION}"
     ]
     args = {
+        VERSION        = trimprefix(VERSION, "v")
         RUST_VERSION   = item.RUST_VERSION
         DEBIAN_VERSION = item.DEBIAN_VERSION
     }
@@ -44,6 +46,7 @@ target "workbench-dist" {
         "harrybrwn/workbench-dist:${VERSION}-${item.DEBIAN_VERSION}"
     ]
     args = {
+        VERSION        = trimprefix(VERSION, "v")
         RUST_VERSION   = item.RUST_VERSION
         DEBIAN_VERSION = item.DEBIAN_VERSION
     }
@@ -58,6 +61,7 @@ target "builder" {
     target = "builder"
     tags = ["workbench-builder"]
     args = {
+        VERSION        = trimprefix(VERSION, "v")
         RUST_VERSION   = "1.84.0-bookworm"
         DEBIAN_VERSION = "bookworm"
     }

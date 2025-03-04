@@ -29,11 +29,15 @@ jobs:
           DOCKER_BUILDKIT: '1'
           BUILDX_BAKE_ENTITLEMENTS_FS: '0'
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          VERSION: ${{ inputs.version }}
         run: |
-          eval $(ssh-agent -s)
+          eval "$(ssh-agent -s)"
           echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
           export DOCKER_BUILDKIT=1
           docker buildx bake workbench-dist
+      - name: Create Default Asset
+        run: |
+          cp docker-build/workbench*_bookworm_amd64.deb docker-build/workbench_amd64.deb
       - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}

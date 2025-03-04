@@ -1,15 +1,29 @@
 local pax = require('pax')
 local util = require('util')
 
+local fzf_version = "0.60.3"       -- https://github.com/junegunn/fzf
+local goci_lint_version = "1.64.5" -- https://github.com/golangci/golangci-lint
+local k9s_version = "0.40.5"       -- https://github.com/derailed/k9s
+local neovim_version = "0.10.4"    -- https://github.com/neovim/neovim
+local eza_version = "0.20.23"      -- https://github.com/eza-community/eza
+local rg_version = "14.1.1"        -- https://github.com/BurntSushi/ripgrep
+local alacritty_version = "0.15.1" -- https://github.com/alacritty/alacritty
+local fx_version = "35.0.0"        -- https://github.com/antonmedv/fx
+local tokei_version = "12.1.2"     -- https://github.com/XAMPPRocky/tokei
+local kubectx_version = "0.9.5"    -- https://github.com/ahmetb/kubectx
+local dust_version = "1.1.2"       -- https://github.com/bootandy/dust
+local k3d_version = "5.8.3"
+local yt_dlp_version = "2025.02.19"
+
 for _, spec in pairs({
   { repo = "git@github.com:harrybrwn/dots.git",          branch = "main" },
   { repo = "git@github.com:harrybrwn/govm.git",          branch = "main" },
-  { repo = "git@github.com:BurntSushi/ripgrep.git",      branch = "14.1.1",  dest = "rg" },
-  { repo = "git@github.com:XAMPPRocky/tokei.git",        branch = "v12.1.2" },
-  { repo = "git@github.com:eza-community/eza.git",       branch = "v0.20.22" },
-  { repo = "git@github.com:neovim/neovim.git",           branch = 'v0.10.4' },
-  { repo = "git@github.com:alacritty/alacritty.git",     branch = "v0.15.1" },
-  { repo = "git@github.com:antonmedv/fx.git",            branch = "35.0.0" },
+  { repo = "git@github.com:BurntSushi/ripgrep.git",      branch = rg_version,              dest = "rg" },
+  { repo = "git@github.com:XAMPPRocky/tokei.git",        branch = "v" .. tokei_version },
+  { repo = "git@github.com:eza-community/eza.git",       branch = "v" .. eza_version },
+  { repo = "git@github.com:neovim/neovim.git",           branch = 'v' .. neovim_version },
+  { repo = "git@github.com:alacritty/alacritty.git",     branch = "v" .. alacritty_version },
+  { repo = "git@github.com:antonmedv/fx.git",            branch = fx_version },
   { repo = "git@github.com:dandavison/delta.git",        branch = "0.18.2" },
   { repo = "git@github.com:cykerway/complete-alias.git", branch = "master" },
 }) do
@@ -54,6 +68,7 @@ local project = pax.project({
     "tmux",
     "jq",
     "build-essential",
+    "shellcheck",
     "rsync",
     "htop",
     "dnsutils", -- dig
@@ -63,9 +78,15 @@ local project = pax.project({
     "libxcb1 (>= 1.11.1)",
     string.format("libc6 (>= %s)", util.libc()),
   },
+
   provides     = {
-    "neovim (= 0.10.3)",
-    "alacritty (= 0.15.0)"
+    string.format("neovim (= %s)", neovim_version),
+    string.format("alacritty (= %s)", alacritty_version),
+    string.format("ripgrep (= %s)", rg_version),
+    string.format("eza (= %s)", eza_version),
+    string.format("k9s (= %s)", k9s_version),
+    string.format("tokei (= %s)", tokei_version),
+    string.format("kubectx (= %s)", kubectx_version),
   },
   conflicts    = { "golangci-lint" },
   suggests     = {
@@ -100,7 +121,7 @@ local project = pax.project({
 
 project:merge_deb("./.pax/repos/neovim/build/nvim-linux-x86_64.deb")
 project:download_kubectl()
-project:download_yt_dlp({ release = "2025.02.19" })
+project:download_yt_dlp({ release = yt_dlp_version })
 project:download_mc()
 util.download_sccache(project)
 util.download_kubeseal(project)
@@ -113,24 +134,28 @@ util.download_fonts(project, {
 
 -- k9s
 pax.dl.fetch(
-  "https://github.com/derailed/k9s/releases/download/v0.40.5/k9s_linux_amd64.deb",
+  string.format("https://github.com/derailed/k9s/releases/download/v%s/k9s_linux_amd64.deb", k9s_version),
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
-util.add_golangci_lint(project, "1.64.5")
+util.add_golangci_lint(project, goci_lint_version)
 pax.log("downloading kubectx")
-project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubectx")
-project:download_binary("https://github.com/ahmetb/kubectx/releases/download/v0.9.5/kubens")
+project:download_binary(
+  string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubectx", kubectx_version))
+project:download_binary(
+  string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubens", kubectx_version))
 pax.dl.fetch(
-  "https://github.com/bootandy/dust/releases/download/v1.1.1/du-dust_1.1.1-1_amd64.deb",
+  string.format(
+    "https://github.com/bootandy/dust/releases/download/v%s/du-dust_%s-1_amd64.deb",
+    dust_version, dust_version),
   { out = pax.path.join(project:dir(), "tmp", "dust.deb") })
 project:merge_deb(pax.path.join(project:dir(), "tmp", "dust.deb"))
 -- k3d
 project:download_binary(
-  "https://github.com/k3d-io/k3d/releases/download/v5.8.3/k3d-linux-amd64",
+  string.format("https://github.com/k3d-io/k3d/releases/download/v%s/k3d-linux-amd64", k3d_version),
   "k3d")
 -- uv (python) https://docs.astral.sh/uv/
 --project:download_binary("https://astral.sh/uv/install.sh", "install-uv.sh")
-util.add_fzf(project, "0.60.2")
+util.add_fzf(project, fzf_version)
 
 project:go_build({ root = "./.pax/repos/dots", generate = true })
 project:go_build({ root = ".pax/repos/fx", generate = false })
@@ -201,13 +226,11 @@ project:add_files({
   {
     src = ".pax/repos/alacritty/extra/logo/alacritty-term.svg",
     dst = "/usr/share/pixmaps/Alacritty.svg",
-    -- dst = "/usr/share/icons/hicolor/scalable/apps/Alacritty.svg",
     mode = pax.octal("0644"),
   },
   {
     src = ".pax/repos/alacritty/extra/logo/compat/alacritty-term.png",
     dst = "/usr/share/pixmaps/Alacritty.png",
-    -- dst = "/usr/share/icons/hicolor/scalable/apps/Alacritty.png",
     mode = pax.octal("0644"),
   },
   -- delta
