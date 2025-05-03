@@ -13,4 +13,11 @@ sudo apt install -f ./workbench_amd64.deb
 * Add the [ly](https://github.com/fairyglade/ly) display manager
     * requires zig 0.13.0
 * Add [jdupes](https://codeberg.org/jbruchon/jdupes).
-* Add [usbimager](https://bztsrc.gitlab.io/usbimager/)
+* A GUI specific package build
+    * Add [usbimager](https://bztsrc.gitlab.io/usbimager/)
+    * Add obsidian
+
+### Long Term TODOs
+
+* Needs better package management style features.
+* GPG signing and upload to S3

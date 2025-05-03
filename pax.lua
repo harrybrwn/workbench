@@ -1,19 +1,21 @@
 local pax = require('pax')
 local util = require('util')
 
-local fzf_version = "0.60.3"       -- https://github.com/junegunn/fzf
-local goci_lint_version = "1.64.5" -- https://github.com/golangci/golangci-lint
-local k9s_version = "0.40.5"       -- https://github.com/derailed/k9s
-local neovim_version = "0.10.4"    -- https://github.com/neovim/neovim
-local eza_version = "0.20.23"      -- https://github.com/eza-community/eza
-local rg_version = "14.1.1"        -- https://github.com/BurntSushi/ripgrep
-local alacritty_version = "0.15.1" -- https://github.com/alacritty/alacritty
-local fx_version = "35.0.0"        -- https://github.com/antonmedv/fx
-local tokei_version = "12.1.2"     -- https://github.com/XAMPPRocky/tokei
-local kubectx_version = "0.9.5"    -- https://github.com/ahmetb/kubectx
-local dust_version = "1.1.2"       -- https://github.com/bootandy/dust
-local k3d_version = "5.8.3"
+local fzf_version = "0.61.3"       -- https://github.com/junegunn/fzf/releases/latest
+local goci_lint_version = "1.64.5" -- https://github.com/golangci/golangci-lint/releases/latest
+local k9s_version = "0.50.4"       -- https://github.com/derailed/k9s/releases/latest
+local neovim_version = "0.11.1"    -- https://github.com/neovim/neovim/releases/latest
+local eza_version = "0.21.2"       -- https://github.com/eza-community/eza/releases/latest
+local rg_version = "14.1.1"        -- https://github.com/BurntSushi/ripgrep/releases/latest
+local alacritty_version = "0.15.1" -- https://github.com/alacritty/alacritty/releases/latest
+local fx_version = "35.0.0"        -- https://github.com/antonmedv/fx/releases/latest
+local tokei_version = "12.1.2"     -- https://github.com/XAMPPRocky/tokei/releases/latest
+local kubectx_version = "0.9.5"    -- https://github.com/ahmetb/kubectx/releases/latest
+local dust_version = "1.2.0"       -- https://github.com/bootandy/dust/releases/latest
+local k3d_version = "5.8.3"        -- https://github.com/k3d-io/k3d/releases/latest
 local yt_dlp_version = "2025.02.19"
+local delta_version = "0.18.2"     -- https://github.com/dandavison/delta/releases/latest
+local nvtop_version = "3.2.0"      -- https://github.com/Syllo/nvtop/releases/latest
 
 for _, spec in pairs({
   { repo = "git@github.com:harrybrwn/dots.git",          branch = "main" },
@@ -24,8 +26,9 @@ for _, spec in pairs({
   { repo = "git@github.com:neovim/neovim.git",           branch = 'v' .. neovim_version },
   { repo = "git@github.com:alacritty/alacritty.git",     branch = "v" .. alacritty_version },
   { repo = "git@github.com:antonmedv/fx.git",            branch = fx_version },
-  { repo = "git@github.com:dandavison/delta.git",        branch = "0.18.2" },
+  { repo = "git@github.com:dandavison/delta.git",        branch = delta_version },
   { repo = "git@github.com:cykerway/complete-alias.git", branch = "master" },
+  { repo = "git@github.com:Syllo/nvtop.git",             branch = nvtop_version },
 }) do
   util.clone({
     repo   = spec.repo,
@@ -54,7 +57,7 @@ end)
 
 local project = pax.project({
   package      = "workbench",
-  version      = "0.0.1~alpha1",
+  version      = "0.0.1~alpha2",
   section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
@@ -87,6 +90,7 @@ local project = pax.project({
     string.format("k9s (= %s)", k9s_version),
     string.format("tokei (= %s)", tokei_version),
     string.format("kubectx (= %s)", kubectx_version),
+    string.format("nvtop (= %s)", nvtop_version),
   },
   conflicts    = { "golangci-lint" },
   suggests     = {

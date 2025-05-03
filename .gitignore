@@ -2,3 +2,4 @@
 dist/
 /pax
 docker-build/
+demos/
