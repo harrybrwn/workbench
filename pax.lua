@@ -16,19 +16,21 @@ local k3d_version = "5.8.3"        -- https://github.com/k3d-io/k3d/releases/lat
 local yt_dlp_version = "2025.02.19"
 local delta_version = "0.18.2"     -- https://github.com/dandavison/delta/releases/latest
 local nvtop_version = "3.2.0"      -- https://github.com/Syllo/nvtop/releases/latest
+local wallust_version = "3.3.0"    -- https://codeberg.org/explosion-mental/wallust/releases
 
 for _, spec in pairs({
-  { repo = "git@github.com:harrybrwn/dots.git",          branch = "main" },
-  { repo = "git@github.com:harrybrwn/govm.git",          branch = "main" },
-  { repo = "git@github.com:BurntSushi/ripgrep.git",      branch = rg_version,              dest = "rg" },
-  { repo = "git@github.com:XAMPPRocky/tokei.git",        branch = "v" .. tokei_version },
-  { repo = "git@github.com:eza-community/eza.git",       branch = "v" .. eza_version },
-  { repo = "git@github.com:neovim/neovim.git",           branch = 'v' .. neovim_version },
-  { repo = "git@github.com:alacritty/alacritty.git",     branch = "v" .. alacritty_version },
-  { repo = "git@github.com:antonmedv/fx.git",            branch = fx_version },
-  { repo = "git@github.com:dandavison/delta.git",        branch = delta_version },
-  { repo = "git@github.com:cykerway/complete-alias.git", branch = "master" },
-  { repo = "git@github.com:Syllo/nvtop.git",             branch = nvtop_version },
+  { repo = "git@github.com:harrybrwn/dots.git",                 branch = "main" },
+  { repo = "git@github.com:harrybrwn/govm.git",                 branch = "main" },
+  { repo = "git@github.com:BurntSushi/ripgrep.git",             branch = rg_version,              dest = "rg" },
+  { repo = "git@github.com:XAMPPRocky/tokei.git",               branch = "v" .. tokei_version },
+  { repo = "git@github.com:eza-community/eza.git",              branch = "v" .. eza_version },
+  { repo = "git@github.com:neovim/neovim.git",                  branch = 'v' .. neovim_version },
+  { repo = "git@github.com:alacritty/alacritty.git",            branch = "v" .. alacritty_version },
+  { repo = "git@github.com:antonmedv/fx.git",                   branch = fx_version },
+  { repo = "git@github.com:dandavison/delta.git",               branch = delta_version },
+  { repo = "git@github.com:cykerway/complete-alias.git",        branch = "master" },
+  { repo = "git@github.com:Syllo/nvtop.git",                    branch = nvtop_version },
+  { repo = "https://codeberg.org/explosion-mental/wallust.git", branch = wallust_version },
 }) do
   util.clone({
     repo   = spec.repo,
@@ -57,7 +59,7 @@ end)
 
 local project = pax.project({
   package      = "workbench",
-  version      = "0.0.1~alpha2",
+  version      = "0.0.1~alpha3",
   section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
@@ -91,6 +93,7 @@ local project = pax.project({
     string.format("tokei (= %s)", tokei_version),
     string.format("kubectx (= %s)", kubectx_version),
     string.format("nvtop (= %s)", nvtop_version),
+    string.format("wallust (= %s)", wallust_version),
   },
   conflicts    = { "golangci-lint" },
   suggests     = {
@@ -174,6 +177,7 @@ util.ripgrep_assets(project, ".pax/repos/rg") -- build and add completion/man
 project:cargo_build({ root = ".pax/repos/tokei" })
 project:cargo_build({ root = ".pax/repos/eza" })
 project:cargo_build({ root = ".pax/repos/delta" })
+project:cargo_build({ root = ".pax/repos/wallust" })
 
 -- requires:
 -- $ apt install cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
@@ -247,6 +251,25 @@ project:add_files({
     dst  = "/usr/share/complete-alias/complete_alias",
     mode = pax.octal("0644"),
   },
+  -- wallust
+  {
+    src  = ".pax/repos/wallust/schema.json",
+    dst  = "/usr/share/wallust/schema.json",
+    mode = pax.octal("0644"),
+  },
+  {
+    src  = ".pax/repos/wallust/wallust.toml",
+    dst  = "/usr/share/wallust/wallust.toml",
+    mode = pax.octal("0644"),
+  },
+  {
+    src  = ".pax/repos/wallust/man",
+    dst  = "/usr/share/man/man1/",
+    mode = pax.octal("0644"),
+  },
+  util.bash_comp(".pax/repos/wallust/completions/wallust.bash", "wallust"),
+  util.zsh_comp(".pax/repos/wallust/completions/_wallust"),
+  util.bash_comp(".pax/repos/wallust/completions/wallust.fish"),
 })
 
 project:finish()
