@@ -13,6 +13,7 @@ target "workbench" {
         item = [
             { RUST_VERSION = "1.84.0-bookworm", DEBIAN_VERSION = "bookworm" },
             { RUST_VERSION = "1.84.0-bullseye", DEBIAN_VERSION = "bullseye" },
+            { RUST_VERSION = "1.90.0-trixie", DEBIAN_VERSION = "trixie" },
         ]
     }
     name       = "workbench_${replace(item.RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
@@ -35,6 +36,7 @@ target "workbench-dist" {
         item = [
             { RUST_VERSION = "1.84.0-bookworm", DEBIAN_VERSION = "bookworm" },
             { RUST_VERSION = "1.84.0-bullseye", DEBIAN_VERSION = "bullseye" },
+            { RUST_VERSION = "1.90.0-trixie", DEBIAN_VERSION = "trixie" },
         ]
     }
     name       = "workbench-dist_${replace(item.RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"

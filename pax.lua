@@ -1,22 +1,21 @@
 local pax = require('pax')
 local util = require('util')
 
-local fzf_version = "0.61.3"       -- https://github.com/junegunn/fzf/releases/latest
-local goci_lint_version = "1.64.5" -- https://github.com/golangci/golangci-lint/releases/latest
-local k9s_version = "0.50.4"       -- https://github.com/derailed/k9s/releases/latest
-local neovim_version = "0.11.1"    -- https://github.com/neovim/neovim/releases/latest
-local eza_version = "0.21.2"       -- https://github.com/eza-community/eza/releases/latest
-local rg_version = "14.1.1"        -- https://github.com/BurntSushi/ripgrep/releases/latest
-local alacritty_version = "0.15.1" -- https://github.com/alacritty/alacritty/releases/latest
-local fx_version = "35.0.0"        -- https://github.com/antonmedv/fx/releases/latest
-local tokei_version = "12.1.2"     -- https://github.com/XAMPPRocky/tokei/releases/latest
-local kubectx_version = "0.9.5"    -- https://github.com/ahmetb/kubectx/releases/latest
-local dust_version = "1.2.0"       -- https://github.com/bootandy/dust/releases/latest
-local k3d_version = "5.8.3"        -- https://github.com/k3d-io/k3d/releases/latest
-local yt_dlp_version = "2025.02.19"
-local delta_version = "0.18.2"     -- https://github.com/dandavison/delta/releases/latest
-local nvtop_version = "3.2.0"      -- https://github.com/Syllo/nvtop/releases/latest
-local wallust_version = "3.3.0"    -- https://codeberg.org/explosion-mental/wallust/releases
+local alacritty_version = "0.16.1"    -- https://github.com/alacritty/alacritty/releases/latest
+local delta_version = "0.18.2"        -- https://github.com/dandavison/delta/releases/latest
+local dust_version = "1.2.3"          -- https://github.com/bootandy/dust/releases/latest
+local eza_version = "0.23.4"          -- https://github.com/eza-community/eza/releases/latest
+local fx_version = "39.1.0"           -- https://github.com/antonmedv/fx/releases/latest
+local fzf_version = "0.66.1"          -- https://github.com/junegunn/fzf/releases/latest
+local k3d_version = "5.8.3"           -- https://github.com/k3d-io/k3d/releases/latest
+local k9s_version = "0.50.16"         -- https://github.com/derailed/k9s/releases/latest
+local kubectx_version = "0.9.5"       -- https://github.com/ahmetb/kubectx/releases/latest
+local neovim_version = "0.11.5"       -- https://github.com/neovim/neovim/releases/latest
+local nvtop_version = "3.2.0"         -- https://github.com/Syllo/nvtop/releases/latest
+local rg_version = "15.1.0"           -- https://github.com/BurntSushi/ripgrep/releases/latest
+local tokei_version = "13.0.0-alpha9" -- https://github.com/XAMPPRocky/tokei/releases/latest
+local wallust_version = "3.4.0"       -- https://codeberg.org/explosion-mental/wallust/releases
+local yt_dlp_version = "2025.10.22"   -- https://github.com/yt-dlp/yt-dlp/releases/latest
 
 for _, spec in pairs({
   { repo = "git@github.com:harrybrwn/dots.git",                 branch = "main" },
@@ -59,7 +58,7 @@ end)
 
 local project = pax.project({
   package      = "workbench",
-  version      = "0.0.1~alpha3",
+  version      = "0.0.1~alpha4",
   section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
@@ -76,6 +75,8 @@ local project = pax.project({
     "shellcheck",
     "rsync",
     "htop",
+    "btop",
+    "sqlite3",
     "dnsutils", -- dig
     -- alacritty deps
     "libfontconfig1 (>= 2.12.6)",
@@ -95,7 +96,6 @@ local project = pax.project({
     string.format("nvtop (= %s)", nvtop_version),
     string.format("wallust (= %s)", wallust_version),
   },
-  conflicts    = { "golangci-lint" },
   suggests     = {
     "helm",
     "docker-ce",
@@ -144,7 +144,6 @@ pax.dl.fetch(
   string.format("https://github.com/derailed/k9s/releases/download/v%s/k9s_linux_amd64.deb", k9s_version),
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
-util.add_golangci_lint(project, goci_lint_version)
 pax.log("downloading kubectx")
 project:download_binary(
   string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubectx", kubectx_version))
