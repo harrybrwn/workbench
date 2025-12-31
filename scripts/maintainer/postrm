@@ -20,9 +20,15 @@ if [ "$1" = "purge" ]; then
 fi
 
 if command -v update-alternatives >/dev/null; then
-  update-alternatives --remove editor /usr/bin/nvim || true
-  update-alternatives --remove vi /usr/bin/nvim || true
-  update-alternatives --remove x-terminal-emulator /usr/bin/alacritty || true
+  if [ -L /usr/bin/x-terminal-emulator ] && update-alternatives --query x-terminal-emulator >/dev/null 2>&1 ; then
+    update-alternatives --remove editor /usr/bin/nvim || true
+  fi
+  if [ -L /usr/bin/editor ] && update-alternatives --query editor >/dev/null 2>&1; then
+    update-alternatives --remove vi /usr/bin/nvim || true
+  fi
+  if [ -L /usr/bin/vi ] && update-alternatives --query vi >/dev/null 2>&1; then
+    update-alternatives --remove x-terminal-emulator /usr/bin/alacritty || true
+  fi
 fi
 
 # vim: ft=bash ts=2 sw=2 sts=2 expandtab

@@ -9,27 +9,6 @@ local function basename(str)
   return name
 end
 
---- @param repo string
---- @param opts? pax.GitCloneOpts
---- @return pax.GitCloneOpts
-local function cloneopts(repo, opts)
-  if opts == nil then
-    opts = { repo = repo }
-  end
-  if opts.dest ~= nil then
-    if not string.find(opts.dest, "^(%.?/?)(%.pax/repos)") then
-      opts.dest = pax.path.join(".pax/repos", opts.dest)
-    end
-  else
-    local name = string.gsub(basename(repo), ".git", "")
-    opts.dest = pax.path.join(".pax/repos", name)
-  end
-  if opts.repo == nil then
-    opts.repo = repo
-  end
-  return opts
-end
-
 local M = {}
 
 --- @param project pax.Project
@@ -85,6 +64,27 @@ function M.ripgrep_assets(project, dir)
       mode = pax.octal("0644"),
     }
   })
+end
+
+--- @param repo string
+--- @param opts? pax.GitCloneOpts
+--- @return pax.GitCloneOpts
+local function cloneopts(repo, opts)
+  if opts == nil then
+    opts = { repo = repo }
+  end
+  if opts.dest ~= nil then
+    if not string.find(opts.dest, "^(%.?/?)(%.pax/repos)") then
+      opts.dest = pax.path.join(".pax/repos", opts.dest)
+    end
+  else
+    local name = string.gsub(basename(repo), ".git", "")
+    opts.dest = pax.path.join(".pax/repos", name)
+  end
+  if opts.repo == nil then
+    opts.repo = repo
+  end
+  return opts
 end
 
 --- @param opts pax.GitCloneOpts

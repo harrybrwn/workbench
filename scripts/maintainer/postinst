@@ -3,17 +3,17 @@
 set -euo pipefail
 
 if command -v update-alternatives >/dev/null; then
-  if [ -L /usr/bin/x-terminal-emulator ] && update-alternatives --query x-terminal-emulator 2>&1 >/dev/null; then
+  if [ -L /usr/bin/x-terminal-emulator ] && update-alternatives --query x-terminal-emulator >/dev/null 2>&1; then
     update-alternatives \
       --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 50 \
       --slave /usr/share/man/man1/x-terminal-emulator.1.gz x-terminal-emulator.1.gz /usr/share/man/man1/alacritty.1
   fi
-  if [ -L /usr/bin/editor ] && update-alternatives --query editor 2>&1 >/dev/null; then
+  if [ -L /usr/bin/editor ] && update-alternatives --query editor >/dev/null 2>&1; then
     update-alternatives \
       --install /usr/bin/editor editor /usr/bin/nvim 50 \
       --slave /usr/share/man/man1/editor.1.gz editor.1.gz /usr/share/man/man1/nvim.1
   fi
-  if [ -L /usr/bin/vi ] && update-alternatives --query vi 2>&1 >/dev/null; then
+  if [ -L /usr/bin/vi ] && update-alternatives --query vi >/dev/null 2>&1; then
     update-alternatives \
       --install /usr/bin/vi vi /usr/bin/nvim 50 \
       --slave /usr/share/man/man1/vi.1.gz vi.1.gz /usr/share/man/man1/nvim.1

@@ -1,35 +1,41 @@
 local pax = require('pax')
 local util = require('util')
 
-local alacritty_version = "0.16.1"    -- https://github.com/alacritty/alacritty/releases/latest
-local delta_version = "0.18.2"        -- https://github.com/dandavison/delta/releases/latest
-local dust_version = "1.2.3"          -- https://github.com/bootandy/dust/releases/latest
-local eza_version = "0.23.4"          -- https://github.com/eza-community/eza/releases/latest
-local fx_version = "39.1.0"           -- https://github.com/antonmedv/fx/releases/latest
-local fzf_version = "0.66.1"          -- https://github.com/junegunn/fzf/releases/latest
-local k3d_version = "5.8.3"           -- https://github.com/k3d-io/k3d/releases/latest
-local k9s_version = "0.50.16"         -- https://github.com/derailed/k9s/releases/latest
-local kubectx_version = "0.9.5"       -- https://github.com/ahmetb/kubectx/releases/latest
-local neovim_version = "0.11.5"       -- https://github.com/neovim/neovim/releases/latest
-local nvtop_version = "3.2.0"         -- https://github.com/Syllo/nvtop/releases/latest
-local rg_version = "15.1.0"           -- https://github.com/BurntSushi/ripgrep/releases/latest
-local tokei_version = "13.0.0-alpha9" -- https://github.com/XAMPPRocky/tokei/releases/latest
-local wallust_version = "3.4.0"       -- https://codeberg.org/explosion-mental/wallust/releases
-local yt_dlp_version = "2025.10.22"   -- https://github.com/yt-dlp/yt-dlp/releases/latest
+local versions = {
+  alacritty = "0.16.1",     -- https://github.com/alacritty/alacritty/releases/latest
+  delta     = "0.18.2",     -- https://github.com/dandavison/delta/releases/latest
+  dust      = "1.2.3",      -- https://github.com/bootandy/dust/releases/latest
+  eza       = "0.23.4",     -- https://github.com/eza-community/eza/releases/latest
+  fx        = "39.2.0",     -- https://github.com/antonmedv/fx/releases/latest
+  fzf       = "0.67.0",     -- https://github.com/junegunn/fzf/releases/latest
+  hyperfine = "v1.20.0",    -- https://github.com/sharkdp/hyperfine/releases
+  k3d       = "5.8.3",      -- https://github.com/k3d-io/k3d/releases/latest
+  k9s       = "0.50.16",    -- https://github.com/derailed/k9s/releases/latest
+  kubectx   = "0.9.5",      -- https://github.com/ahmetb/kubectx/releases/latest
+  neovim    = "0.11.5",     -- https://github.com/neovim/neovim/releases/latest
+  nvtop     = "3.2.0",      -- https://github.com/Syllo/nvtop/releases/latest
+  rg        = "15.1.0",     -- https://github.com/BurntSushi/ripgrep/releases/latest
+  tokei     = "13.0.0",     -- https://github.com/XAMPPRocky/tokei/releases/latest
+  wallust   = "3.4.0",      -- https://codeberg.org/explosion-mental/wallust/releases
+  yt_dlp    = "2025.12.08", -- https://github.com/yt-dlp/yt-dlp/releases/latest
+  fd        = "10.3.0"      -- https://github.com/sharkdp/fd/releases
+}
 
 for _, spec in pairs({
   { repo = "git@github.com:harrybrwn/dots.git",                 branch = "main" },
   { repo = "git@github.com:harrybrwn/govm.git",                 branch = "main" },
-  { repo = "git@github.com:BurntSushi/ripgrep.git",             branch = rg_version,              dest = "rg" },
-  { repo = "git@github.com:XAMPPRocky/tokei.git",               branch = "v" .. tokei_version },
-  { repo = "git@github.com:eza-community/eza.git",              branch = "v" .. eza_version },
-  { repo = "git@github.com:neovim/neovim.git",                  branch = 'v' .. neovim_version },
-  { repo = "git@github.com:alacritty/alacritty.git",            branch = "v" .. alacritty_version },
-  { repo = "git@github.com:antonmedv/fx.git",                   branch = fx_version },
-  { repo = "git@github.com:dandavison/delta.git",               branch = delta_version },
+  { repo = "git@github.com:BurntSushi/ripgrep.git",             branch = versions.rg,              dest = "rg" },
+  { repo = "git@github.com:XAMPPRocky/tokei.git",               branch = "v" .. versions.tokei },
+  { repo = "git@github.com:eza-community/eza.git",              branch = "v" .. versions.eza },
+  { repo = "git@github.com:neovim/neovim.git",                  branch = 'v' .. versions.neovim },
+  { repo = "git@github.com:alacritty/alacritty.git",            branch = "v" .. versions.alacritty },
+  { repo = "git@github.com:antonmedv/fx.git",                   branch = versions.fx },
+  { repo = "git@github.com:dandavison/delta.git",               branch = versions.delta },
   { repo = "git@github.com:cykerway/complete-alias.git",        branch = "master" },
-  { repo = "git@github.com:Syllo/nvtop.git",                    branch = nvtop_version },
-  { repo = "https://codeberg.org/explosion-mental/wallust.git", branch = wallust_version },
+  { repo = "git@github.com:Syllo/nvtop.git",                    branch = versions.nvtop },
+  { repo = "https://codeberg.org/explosion-mental/wallust.git", branch = versions.wallust },
+  -- { repo = "git@github.com:sharkdp/hyperfine.git",              branch = versions.hyperfine },
+  -- { repo = "git@github.com:sharkdp/fd.git",                     branch = "v" .. versions.fd },
 }) do
   util.clone({
     repo   = spec.repo,
@@ -82,19 +88,21 @@ local project = pax.project({
     "libfontconfig1 (>= 2.12.6)",
     "libfreetype6 (>= 2.8)",
     "libxcb1 (>= 1.11.1)",
+    "fd-find",
+    "hyperfine",
     string.format("libc6 (>= %s)", util.libc()),
   },
 
   provides     = {
-    string.format("neovim (= %s)", neovim_version),
-    string.format("alacritty (= %s)", alacritty_version),
-    string.format("ripgrep (= %s)", rg_version),
-    string.format("eza (= %s)", eza_version),
-    string.format("k9s (= %s)", k9s_version),
-    string.format("tokei (= %s)", tokei_version),
-    string.format("kubectx (= %s)", kubectx_version),
-    string.format("nvtop (= %s)", nvtop_version),
-    string.format("wallust (= %s)", wallust_version),
+    string.format("neovim (= %s)", versions.neovim),
+    string.format("alacritty (= %s)", versions.alacritty),
+    string.format("ripgrep (= %s)", versions.rg),
+    string.format("eza (= %s)", versions.eza),
+    string.format("k9s (= %s)", versions.k9s),
+    string.format("tokei (= %s)", versions.tokei),
+    string.format("kubectx (= %s)", versions.kubectx),
+    string.format("nvtop (= %s)", versions.nvtop),
+    string.format("wallust (= %s)", versions.wallust),
   },
   suggests     = {
     "helm",
@@ -128,7 +136,7 @@ local project = pax.project({
 
 project:merge_deb("./.pax/repos/neovim/build/nvim-linux-x86_64.deb")
 project:download_kubectl()
-project:download_yt_dlp({ release = yt_dlp_version })
+project:download_yt_dlp({ release = versions.yt_dlp })
 project:download_mc()
 util.download_sccache(project)
 util.download_kubeseal(project)
@@ -141,27 +149,27 @@ util.download_fonts(project, {
 
 -- k9s
 pax.dl.fetch(
-  string.format("https://github.com/derailed/k9s/releases/download/v%s/k9s_linux_amd64.deb", k9s_version),
+  string.format("https://github.com/derailed/k9s/releases/download/v%s/k9s_linux_amd64.deb", versions.k9s),
   { out = pax.path.join(project:dir(), "k9s.deb") })
 project:merge_deb(pax.path.join(project:dir(), "k9s.deb"))
 pax.log("downloading kubectx")
 project:download_binary(
-  string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubectx", kubectx_version))
+  string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubectx", versions.kubectx))
 project:download_binary(
-  string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubens", kubectx_version))
+  string.format("https://github.com/ahmetb/kubectx/releases/download/v%s/kubens", versions.kubectx))
 pax.dl.fetch(
   string.format(
     "https://github.com/bootandy/dust/releases/download/v%s/du-dust_%s-1_amd64.deb",
-    dust_version, dust_version),
+    versions.dust, versions.dust),
   { out = pax.path.join(project:dir(), "tmp", "dust.deb") })
 project:merge_deb(pax.path.join(project:dir(), "tmp", "dust.deb"))
 -- k3d
 project:download_binary(
-  string.format("https://github.com/k3d-io/k3d/releases/download/v%s/k3d-linux-amd64", k3d_version),
+  string.format("https://github.com/k3d-io/k3d/releases/download/v%s/k3d-linux-amd64", versions.k3d),
   "k3d")
 -- uv (python) https://docs.astral.sh/uv/
 --project:download_binary("https://astral.sh/uv/install.sh", "install-uv.sh")
-util.add_fzf(project, fzf_version)
+util.add_fzf(project, versions.fzf)
 
 project:go_build({ root = "./.pax/repos/dots", generate = true })
 project:go_build({ root = ".pax/repos/fx", generate = false })
