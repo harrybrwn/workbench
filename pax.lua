@@ -2,29 +2,29 @@ local pax = require('pax')
 local util = require('util')
 
 local versions = {
-  alacritty = "0.16.1",     -- https://github.com/alacritty/alacritty/releases/latest
-  delta     = "0.18.2",     -- https://github.com/dandavison/delta/releases/latest
-  dust      = "1.2.3",      -- https://github.com/bootandy/dust/releases/latest
-  eza       = "0.23.4",     -- https://github.com/eza-community/eza/releases/latest
-  fx        = "39.2.0",     -- https://github.com/antonmedv/fx/releases/latest
-  fzf       = "0.67.0",     -- https://github.com/junegunn/fzf/releases/latest
-  hyperfine = "v1.20.0",    -- https://github.com/sharkdp/hyperfine/releases
-  k3d       = "5.8.3",      -- https://github.com/k3d-io/k3d/releases/latest
-  k9s       = "0.50.16",    -- https://github.com/derailed/k9s/releases/latest
-  kubectx   = "0.9.5",      -- https://github.com/ahmetb/kubectx/releases/latest
-  neovim    = "0.11.5",     -- https://github.com/neovim/neovim/releases/latest
-  nvtop     = "3.2.0",      -- https://github.com/Syllo/nvtop/releases/latest
-  rg        = "15.1.0",     -- https://github.com/BurntSushi/ripgrep/releases/latest
-  tokei     = "13.0.0",     -- https://github.com/XAMPPRocky/tokei/releases/latest
-  wallust   = "3.4.0",      -- https://codeberg.org/explosion-mental/wallust/releases
-  yt_dlp    = "2025.12.08", -- https://github.com/yt-dlp/yt-dlp/releases/latest
-  fd        = "10.3.0"      -- https://github.com/sharkdp/fd/releases
+  alacritty  = "0.17.0",  -- https://github.com/alacritty/alacritty/releases/latest
+  delta      = "0.19.2",  -- https://github.com/dandavison/delta/releases/latest
+  dust       = "1.2.4",   -- https://github.com/bootandy/dust/releases/latest
+  eza        = "0.23.4",  -- https://github.com/eza-community/eza/releases/latest
+  fx         = "39.2.0",  -- https://github.com/antonmedv/fx/releases/latest
+  fzf        = "0.73.1",  -- https://github.com/junegunn/fzf/releases/latest
+  hyperfine  = "v1.20.0", -- https://github.com/sharkdp/hyperfine/releases
+  k3d        = "5.8.3",   -- https://github.com/k3d-io/k3d/releases/latest
+  k9s        = "0.50.18", -- https://github.com/derailed/k9s/releases/latest
+  kubectx    = "0.11.0",  -- https://github.com/ahmetb/kubectx/releases/latest
+  neovim     = "0.12.2",  -- https://github.com/neovim/neovim/releases/latest
+  nvtop      = "3.3.2",   -- https://github.com/Syllo/nvtop/releases/latest
+  rg         = "15.1.0",  -- https://github.com/BurntSushi/ripgrep/releases/latest
+  tokei      = "14.0.0",  -- https://github.com/XAMPPRocky/tokei/releases/latest
+  wallust    = "3.5.2",   -- https://codeberg.org/explosion-mental/wallust/releases
+  fd         = "10.4.2",  -- https://github.com/sharkdp/fd/releases
+  treesitter = "0.26.9",  -- https://github.com/tree-sitter/tree-sitter/releases/latest
 }
 
-for _, spec in pairs({
+local repos = {
   { repo = "git@github.com:harrybrwn/dots.git",                 branch = "main" },
   { repo = "git@github.com:harrybrwn/govm.git",                 branch = "main" },
-  { repo = "git@github.com:BurntSushi/ripgrep.git",             branch = versions.rg,              dest = "rg" },
+  { repo = "git@github.com:BurntSushi/ripgrep.git",             branch = versions.rg,               dest = "rg" },
   { repo = "git@github.com:XAMPPRocky/tokei.git",               branch = "v" .. versions.tokei },
   { repo = "git@github.com:eza-community/eza.git",              branch = "v" .. versions.eza },
   { repo = "git@github.com:neovim/neovim.git",                  branch = 'v' .. versions.neovim },
@@ -34,15 +34,15 @@ for _, spec in pairs({
   { repo = "git@github.com:cykerway/complete-alias.git",        branch = "master" },
   { repo = "git@github.com:Syllo/nvtop.git",                    branch = versions.nvtop },
   { repo = "https://codeberg.org/explosion-mental/wallust.git", branch = versions.wallust },
+  { repo = "git@github.com:tree-sitter/tree-sitter.git",        branch = 'v' .. versions.treesitter },
   -- { repo = "git@github.com:sharkdp/hyperfine.git",              branch = versions.hyperfine },
   -- { repo = "git@github.com:sharkdp/fd.git",                     branch = "v" .. versions.fd },
-}) do
-  util.clone({
-    repo   = spec.repo,
-    depth  = 1,
-    branch = spec.branch,
-    dest   = spec.dest,
-  })
+}
+
+for _, spec in pairs(repos) do
+  spec.depth = 1
+  spec.dest = util.clone_dest(spec)
+  util.clone(spec)
 end
 
 -- TODO make sure the host has neovim's build dependancies
@@ -64,7 +64,7 @@ end)
 
 local project = pax.project({
   package      = "workbench",
-  version      = "0.0.1~alpha4",
+  version      = "0.0.1~alpha3",
   section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
@@ -136,7 +136,6 @@ local project = pax.project({
 
 project:merge_deb("./.pax/repos/neovim/build/nvim-linux-x86_64.deb")
 project:download_kubectl()
-project:download_yt_dlp({ release = versions.yt_dlp })
 project:download_mc()
 util.download_sccache(project)
 util.download_kubeseal(project)
@@ -185,6 +184,7 @@ project:cargo_build({ root = ".pax/repos/tokei" })
 project:cargo_build({ root = ".pax/repos/eza" })
 project:cargo_build({ root = ".pax/repos/delta" })
 project:cargo_build({ root = ".pax/repos/wallust" })
+project:cargo_build({ root = ".pax/repos/tree-sitter", profile = "optimize" })
 
 -- requires:
 -- $ apt install cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3

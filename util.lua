@@ -66,36 +66,32 @@ function M.ripgrep_assets(project, dir)
   })
 end
 
---- @param repo string
---- @param opts? pax.GitCloneOpts
---- @return pax.GitCloneOpts
-local function cloneopts(repo, opts)
-  if opts == nil then
-    opts = { repo = repo }
-  end
+--- @param opts pax.GitCloneOpts
+function M.clone_dest(opts)
   if opts.dest ~= nil then
     if not string.find(opts.dest, "^(%.?/?)(%.pax/repos)") then
       opts.dest = pax.path.join(".pax/repos", opts.dest)
     end
   else
-    local name = string.gsub(basename(repo), ".git", "")
+    local name = string.gsub(basename(opts.repo), ".git", "")
     opts.dest = pax.path.join(".pax/repos", name)
   end
-  if opts.repo == nil then
-    opts.repo = repo
-  end
-  return opts
+  return opts.dest
 end
 
 --- @param opts pax.GitCloneOpts
 function M.clone(opts)
-  local o = cloneopts(opts.repo, opts)
+  if opts.dest == nil then
+    opts.dest = M.clone_dest(opts)
+    pax.log("setting clone dest to " .. opts.dest)
+  end
   if pax.fs.exists(opts.dest) then
     pax.log(opts.repo .. " already cloned")
     return
   end
-  pax.log("cloning " .. opts.repo)
-  pax.git.clone(opts.repo, o)
+  pax.log(string.format("cloning '%s' into '%s'", opts.repo, opts.dest))
+  pax.print(opts)
+  pax.git.clone(opts)
 end
 
 function M.download_fonts(project, names)
@@ -251,39 +247,9 @@ echo ln -snf "$INSTALL_DIR" "$CURRENT_INSTALL_DIR"
   )
 end
 
-local bash_comp_dir = "/usr/share/bash-completion/completions"
-local zsh_comp_dir = "/usr/share/zsh/vendor-completions"
-local fish_comp_dir = "/usr/share/fish/vendor_completions.d"
-
---- @param src string
---- @param dst string
---- @param dstname? string
---- @return pax.File
-local function comp(src, dst, dstname)
-  if dstname == nil then
-    dstname = pax.path.basename(src)
-  end
-  return {
-    src = src,
-    dst = pax.path.join(dst, dstname),
-    mode = pax.octal("0644"),
-  }
-end
-
---- @param path string
---- @param dstname? string
---- @return pax.File
-function M.bash_comp(path, dstname) return comp(path, bash_comp_dir, dstname) end
-
---- @param path string
---- @param dstname? string
---- @return pax.File
-function M.zsh_comp(path, dstname) return comp(path, zsh_comp_dir, dstname) end
-
---- @param path string
---- @param dstname? string
---- @return pax.File
-function M.fish_comp(path, dstname) return comp(path, fish_comp_dir, dstname) end
+M.bash_comp = require('misc.paxutil').bash_comp
+M.zsh_comp = require('misc.paxutil').zsh_comp
+M.fish_comp = require('misc.paxutil').fish_comp
 
 --- @param filename string
 --- @return string
@@ -297,6 +263,7 @@ function M.readfile(filename)
   return content
 end
 
+--- Add's self to a pax project.
 --- @param project pax.Project
 function M.add_pax(project)
   local p = pax.path.join(project:dir(), "tmp", "pax-types.lua")
