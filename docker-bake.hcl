@@ -1,5 +1,11 @@
 variable "VERSION" {
-    default = "0.0.1-alpha2"
+    default = "0.0.1-alpha3"
+}
+
+variable "USER" {}
+
+variable "GO_VERSION" {
+  default = "1.23.5"
 }
 
 group "default" {
@@ -28,6 +34,8 @@ target "workbench" {
         VERSION        = trimprefix(VERSION, "v")
         RUST_VERSION   = item.RUST_VERSION
         DEBIAN_VERSION = item.DEBIAN_VERSION
+        USER           = "${USER}"
+        GO_VERSION     = "${GO_VERSION}"
     }
 }
 
@@ -51,6 +59,8 @@ target "workbench-dist" {
         VERSION        = trimprefix(VERSION, "v")
         RUST_VERSION   = item.RUST_VERSION
         DEBIAN_VERSION = item.DEBIAN_VERSION
+        USER           = "${USER}"
+        GO_VERSION     = "${GO_VERSION}"
     }
     output = [
         "type=local,dest=docker-build"
@@ -66,6 +76,8 @@ target "builder" {
         VERSION        = trimprefix(VERSION, "v")
         RUST_VERSION   = "1.84.0-bookworm"
         DEBIAN_VERSION = "bookworm"
+        USER           = "${USER}"
+        GO_VERSION     = "${GO_VERSION}"
     }
     ssh = ["default"]
 }

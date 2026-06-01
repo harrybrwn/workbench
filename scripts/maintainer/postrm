@@ -20,6 +20,7 @@ if [ "$1" = "purge" ]; then
 fi
 
 if command -v update-alternatives >/dev/null; then
+  echo '[workbench postrm] removing alternative links'
   if [ -L /usr/bin/x-terminal-emulator ] && update-alternatives --query x-terminal-emulator >/dev/null 2>&1 ; then
     update-alternatives --remove editor /usr/bin/nvim || true
   fi
@@ -29,6 +30,8 @@ if command -v update-alternatives >/dev/null; then
   if [ -L /usr/bin/vi ] && update-alternatives --query vi >/dev/null 2>&1; then
     update-alternatives --remove x-terminal-emulator /usr/bin/alacritty || true
   fi
+else
+  echo '[workbench postrm] not removing alternative links'
 fi
 
 # vim: ft=bash ts=2 sw=2 sts=2 expandtab

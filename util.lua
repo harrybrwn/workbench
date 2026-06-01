@@ -247,9 +247,10 @@ echo ln -snf "$INSTALL_DIR" "$CURRENT_INSTALL_DIR"
   )
 end
 
-M.bash_comp = require('misc.paxutil').bash_comp
-M.zsh_comp = require('misc.paxutil').zsh_comp
-M.fish_comp = require('misc.paxutil').fish_comp
+local paxutil = require('misc/paxutil')
+M.bash_comp = paxutil.bash_comp
+M.zsh_comp = paxutil.zsh_comp
+M.fish_comp = paxutil.fish_comp
 
 --- @param filename string
 --- @return string

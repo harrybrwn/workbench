@@ -3,6 +3,7 @@
 set -euo pipefail
 
 if command -v update-alternatives >/dev/null; then
+  echo '[workbench postinst] adding alternatives'
   if [ -L /usr/bin/x-terminal-emulator ] && update-alternatives --query x-terminal-emulator >/dev/null 2>&1; then
     update-alternatives \
       --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 50 \
@@ -18,6 +19,8 @@ if command -v update-alternatives >/dev/null; then
       --install /usr/bin/vi vi /usr/bin/nvim 50 \
       --slave /usr/share/man/man1/vi.1.gz vi.1.gz /usr/share/man/man1/nvim.1
   fi
+else
+  echo '[workbench postinst] not adding any alternative links'
 fi
 
 # vim: ft=bash ts=2 sw=2 sts=2 expandtab

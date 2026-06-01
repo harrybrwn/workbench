@@ -4,6 +4,8 @@ set -eu
 set -o pipefail
 set -o functrace
 
+echo 'Running preinstallation script.'
+
 KEYDIR=/etc/apt/keyrings
 if [ ! -d "${KEYDIR}" ]; then
   mkdir --mode=0755 -p "${KEYDIR}"

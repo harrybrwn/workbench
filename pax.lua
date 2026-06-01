@@ -17,8 +17,8 @@ local versions = {
   rg         = "15.1.0",  -- https://github.com/BurntSushi/ripgrep/releases/latest
   tokei      = "14.0.0",  -- https://github.com/XAMPPRocky/tokei/releases/latest
   wallust    = "3.5.2",   -- https://codeberg.org/explosion-mental/wallust/releases
-  fd         = "10.4.2",  -- https://github.com/sharkdp/fd/releases
   treesitter = "0.26.9",  -- https://github.com/tree-sitter/tree-sitter/releases/latest
+  -- fd         = "10.4.2",  -- https://github.com/sharkdp/fd/releases
 }
 
 local repos = {
@@ -129,8 +129,9 @@ local project = pax.project({
     },
   },
   scripts      = {
-    preinst = util.readfile("scripts/maintainer/preinst"),
-    postrm  = util.readfile("scripts/maintainer/postrm"),
+    -- preinst  = util.readfile("scripts/maintainer/preinst"),
+    postinst = util.readfile("scripts/maintainer/postinst"),
+    postrm   = util.readfile("scripts/maintainer/postrm"),
   }
 })
 
@@ -170,7 +171,7 @@ project:download_binary(
 --project:download_binary("https://astral.sh/uv/install.sh", "install-uv.sh")
 util.add_fzf(project, versions.fzf)
 
-project:go_build({ root = "./.pax/repos/dots", generate = true })
+project:go_build({ root = "./.pax/repos/dots", cmd = "./cmd/dots", generate = true })
 project:go_build({ root = ".pax/repos/fx", generate = false })
 project:go_build({
   root            = "./.pax/repos/govm",
