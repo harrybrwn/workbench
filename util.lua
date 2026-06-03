@@ -106,6 +106,14 @@ function M.download_fonts(project, names)
     end
     local url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/" .. name .. ".zip"
     pax.dl.fetch(url, { out = zipfile })
+    if not pax.fs.exists(dir) then
+      pax.log("Error: " .. dir .. " does not exist")
+      goto continue
+    end
+    if not pax.fs.exists(zipfile) then
+      pax.log("Error: " .. zipfile .. " does not exist")
+      goto continue
+    end
     pax.exec("unzip", { "-q", "-o", "-d", dir, zipfile })
     ::continue::
   end

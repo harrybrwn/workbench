@@ -18,8 +18,10 @@ local function build(version)
     if pax.fs.exists("build/nvim-linux64.deb") then
       return
     end
+		pax.log("building neovim")
     pax.sh [[ make CMAKE_BUILD_TYPE=Release ]]
     pax.in_dir("./build", function()
+			pax.log("packaging neovim for debian")
       pax.sh("cpack -G DEB")
     end)
   end)

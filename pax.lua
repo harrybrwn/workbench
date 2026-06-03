@@ -55,9 +55,10 @@ pax.in_dir("./.pax/repos/neovim", function()
     pax.log("neovim already built")
     return
   end
+  pax.log("building neovim")
   pax.sh [[ make CMAKE_BUILD_TYPE=Release ]]
   pax.in_dir("./build", function()
-    pax.log("building neovim")
+    pax.log("packaging neovim for debian")
     pax.sh("cpack -G DEB")
   end)
 end)
