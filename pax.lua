@@ -1,25 +1,6 @@
 local pax = require('pax')
 local util = require('util')
-
-local versions = {
-  alacritty  = "0.17.0",  -- https://github.com/alacritty/alacritty/releases/latest
-  delta      = "0.19.2",  -- https://github.com/dandavison/delta/releases/latest
-  dust       = "1.2.4",   -- https://github.com/bootandy/dust/releases/latest
-  eza        = "0.23.4",  -- https://github.com/eza-community/eza/releases/latest
-  fx         = "39.2.0",  -- https://github.com/antonmedv/fx/releases/latest
-  fzf        = "0.73.1",  -- https://github.com/junegunn/fzf/releases/latest
-  hyperfine  = "v1.20.0", -- https://github.com/sharkdp/hyperfine/releases
-  k3d        = "5.8.3",   -- https://github.com/k3d-io/k3d/releases/latest
-  k9s        = "0.50.18", -- https://github.com/derailed/k9s/releases/latest
-  kubectx    = "0.11.0",  -- https://github.com/ahmetb/kubectx/releases/latest
-  neovim     = "0.12.2",  -- https://github.com/neovim/neovim/releases/latest
-  nvtop      = "3.3.2",   -- https://github.com/Syllo/nvtop/releases/latest
-  rg         = "15.1.0",  -- https://github.com/BurntSushi/ripgrep/releases/latest
-  tokei      = "14.0.0",  -- https://github.com/XAMPPRocky/tokei/releases/latest
-  wallust    = "3.5.2",   -- https://codeberg.org/explosion-mental/wallust/releases
-  treesitter = "0.26.9",  -- https://github.com/tree-sitter/tree-sitter/releases/latest
-  -- fd         = "10.4.2",  -- https://github.com/sharkdp/fd/releases
-}
+local versions = require('versions')
 
 local repos = {
   { repo = "git@github.com:harrybrwn/dots.git",                 branch = "main" },
@@ -63,9 +44,12 @@ pax.in_dir("./.pax/repos/neovim", function()
   end)
 end)
 
+-- local version = string.gsub(pax.git.version(), "^v", "")
+local version = "0.0.1-alpha3"
+
 local project = pax.project({
   package      = "workbench",
-  version      = "0.0.1~alpha3",
+  version      = version,
   section      = "devel",
   author       = pax.git.username(),
   email        = "me@h3y.sh",
@@ -85,13 +69,13 @@ local project = pax.project({
     "btop",
     "sqlite3",
     "dnsutils", -- dig
+    "fd-find",
+    "hyperfine",
     -- alacritty deps
     "libfontconfig1 (>= 2.12.6)",
     "libfreetype6 (>= 2.8)",
     "libxcb1 (>= 1.11.1)",
-    "fd-find",
-    "hyperfine",
-    string.format("libc6 (>= %s)", util.libc()),
+    string.format("libc6 (>= %s)", require('misc.neovim').min_libc_version()),
   },
 
   provides     = {
@@ -188,20 +172,11 @@ project:cargo_build({ root = ".pax/repos/delta" })
 project:cargo_build({ root = ".pax/repos/wallust" })
 project:cargo_build({ root = ".pax/repos/tree-sitter", profile = "optimize" })
 
+-- Alacritty
 -- requires:
 -- $ apt install cmake g++ pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
 project:cargo_build({ root = ".pax/repos/alacritty" })
-for _, o in pairs({
-  { i = ".pax/repos/alacritty/extra/man/alacritty.1.scd",          o = "man1/alacritty.1" },
-  { i = ".pax/repos/alacritty/extra/man/alacritty-msg.1.scd",      o = "man1/alacritty-msg.1" },
-  { i = ".pax/repos/alacritty/extra/man/alacritty.5.scd",          o = "man5/alacritty.5" },
-  { i = ".pax/repos/alacritty/extra/man/alacritty-bindings.5.scd", o = "man5/alacritty-bindings.5" },
-}) do
-  project:scdoc({ input = o.i, output = o.o })
-end
-
--- add ourselves
-util.add_pax(project)
+require('misc.alacritty').add_files(".pax/repos/alacritty", project)
 
 project:add_files({
   -- govm
@@ -226,30 +201,6 @@ project:add_files({
   util.bash_comp(".pax/repos/eza/completions/bash/eza"),
   util.zsh_comp(".pax/repos/eza/completions/zsh/_eza"),
   util.fish_comp(".pax/repos/eza/completions/fish/eza.fish"),
-  -- alacritty
-  util.bash_comp(".pax/repos/alacritty/extra/completions/alacritty.bash", "alacritty"),
-  util.zsh_comp(".pax/repos/alacritty/extra/completions/_alacritty"),
-  util.fish_comp(".pax/repos/alacritty/extra/completions/alacritty.fish"),
-  {
-    src = ".pax/repos/alacritty/extra/linux/Alacritty.desktop",
-    dst = "/usr/share/applications/Alacritty.desktop",
-    mode = pax.octal("0644"),
-  },
-  {
-    src = ".pax/repos/alacritty/extra/linux/org.alacritty.Alacritty.appdata.xml",
-    dst = "/usr/share/metainfo/org.alacritty.Alacritty.appdata.xml",
-    mode = pax.octal("0644"),
-  },
-  {
-    src = ".pax/repos/alacritty/extra/logo/alacritty-term.svg",
-    dst = "/usr/share/pixmaps/Alacritty.svg",
-    mode = pax.octal("0644"),
-  },
-  {
-    src = ".pax/repos/alacritty/extra/logo/compat/alacritty-term.png",
-    dst = "/usr/share/pixmaps/Alacritty.png",
-    mode = pax.octal("0644"),
-  },
   -- delta
   util.bash_comp(".pax/repos/delta/etc/completion/completion.bash", "delta"),
   util.zsh_comp(".pax/repos/delta/etc/completion/completion.zsh", "_delta"),

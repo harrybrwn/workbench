@@ -5,7 +5,11 @@ variable "VERSION" {
 variable "USER" {}
 
 variable "GO_VERSION" {
-  default = "1.23.5"
+  default = "1.26.3"
+}
+
+variable "RUST_VERSION" {
+  default = "1.96.0"
 }
 
 group "default" {
@@ -18,7 +22,20 @@ group "all" {
   targets = ["workbench", "workbench-dist"]
 }
 
-target "workbench-base" {
+function "args" {
+  params = [defaults]
+  result = merge(
+    {
+        VERSION        = trimprefix(VERSION, "v")
+        RUST_VERSION   = RUST_VERSION
+        GO_VERSION     = GO_VERSION
+        DEBIAN_VERSION = "trixie"
+    },
+    defaults,
+  )
+}
+
+target "base" {
     context    = "."
     dockerfile = "Dockerfile"
     target     = "workbench"
@@ -29,27 +46,22 @@ target "workbench" {
     matrix = {
         item = [
             {
-              RUST_VERSION = "1.96.0"
               DEBIAN_VERSION = "bookworm"
             },
             {
-              RUST_VERSION = "1.96.0",
               DEBIAN_VERSION = "trixie"
             },
         ]
     }
-    name       = "workbench_${replace(item.RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
-    inherit    = ["workbench-base"]
+    name       = "workbench_${replace(RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
+    inherit    = ["base"]
     tags       = [
         "harrybrwn/workbench:${VERSION}-${item.DEBIAN_VERSION}"
     ]
-    args = {
-        VERSION        = trimprefix(VERSION, "v")
-        RUST_VERSION   = item.RUST_VERSION
+    args = args({
         DEBIAN_VERSION = item.DEBIAN_VERSION
-        USER           = "${USER}"
-        GO_VERSION     = "${GO_VERSION}"
-    }
+        USER           = USER
+    })
 }
 
 target "workbench-dist" {
@@ -57,58 +69,42 @@ target "workbench-dist" {
         item = [
             # { RUST_VERSION = "1.84.0-bullseye", DEBIAN_VERSION = "bullseye" },
             {
-              RUST_VERSION   = "1.96.0",
               DEBIAN_VERSION = "bookworm"
             },
             {
-              RUST_VERSION   = "1.96.0",
               DEBIAN_VERSION = "trixie"
             },
         ]
     }
-    name       = "workbench-dist_${replace(item.RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
-    inherit    = ["workbench-base"]
-    tags       = [
+    name    = "workbench-dist_${replace(RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
+    inherit = ["base"]
+    ssh     = ["default"]
+    tags    = [
         "harrybrwn/workbench-dist:${VERSION}-${item.DEBIAN_VERSION}"
     ]
-    args = {
-        VERSION        = trimprefix(VERSION, "v")
-        RUST_VERSION   = item.RUST_VERSION
+    args = args({
         DEBIAN_VERSION = item.DEBIAN_VERSION
-        USER           = "${USER}"
-        GO_VERSION     = "${GO_VERSION}"
-    }
-    ssh = ["default"]
+        USER           = USER
+    })
     output = [
         "type=local,dest=docker-build"
     ]
 }
 
-target "builder" {
-    context = "."
-    dockerfile = "Dockerfile"
-    target = "builder"
-    tags = ["workbench-builder"]
-    args = {
-        VERSION        = trimprefix(VERSION, "v")
-        RUST_VERSION   = "1.84.0-bookworm"
-        DEBIAN_VERSION = "bookworm"
-        USER           = "${USER}"
-        GO_VERSION     = "${GO_VERSION}"
-    }
-    ssh = ["default"]
+target "test" {
+    inherit = ["base"]
+    target  = "test"
+    tags    = ["workbench-test"]
+    ssh     = ["default"]
+    args    = args({
+      DEBIAN_VERSION = "bookworm"
+    })
 }
 
-target "sshtest" {
-    context = "."
-    dockerfile = "Dockerfile"
-    target = "sshtest"
-    # tags = ["workbench-builder"]
-    args = {
-        VERSION        = trimprefix(VERSION, "v")
-        RUST_VERSION   = "1.96.0"
-        DEBIAN_VERSION = "trixie"
-        GO_VERSION     = "${GO_VERSION}"
-    }
-    ssh = ["default"]
+target "builder" {
+    inherit = ["base"]
+    target  = "builder"
+    tags    = ["workbench-builder"]
+    args    = args({})
+    ssh     = ["default"]
 }

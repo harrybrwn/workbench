@@ -1,4 +1,4 @@
-local paxutil = require("paxutil")
+local paxutil = require("misc.paxutil")
 local M = {}
 
 ---Add support files to the project.

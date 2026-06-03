@@ -255,7 +255,7 @@ echo ln -snf "$INSTALL_DIR" "$CURRENT_INSTALL_DIR"
   )
 end
 
-local paxutil = require('misc/paxutil')
+local paxutil = require('misc.paxutil')
 M.bash_comp = paxutil.bash_comp
 M.zsh_comp = paxutil.zsh_comp
 M.fish_comp = paxutil.fish_comp
@@ -289,6 +289,36 @@ end
 function M.libc()
   local v = pax.os.libc_version()
   return string.format("%d.%d", v.major, v.minor)
+end
+
+function M.os_release()
+  local f = io.open("/etc/os-release", "r")
+  if f == nil then
+    error('failed to read /etc/os-release', 0)
+  end
+  local line, ki, kj, vi, vj
+  local res = {}
+  while true do
+    line = f:read("*l")
+    if line == nil then
+      break
+    end
+    ki, kj = string.find(line, "^.*=")
+    vi, vj = line:find("=.*$")
+    if ki == nil or kj == nil or vi == nil or vj == nil then
+      goto continue
+    end
+    local key = line:sub(ki, kj - 1)
+    local val = line:sub(vi + 1, vj)
+    local vlen = val:len()
+    if val:sub(1, 1) == '"' and val:sub(vlen, vlen) == '"' then
+      val = val:sub(2, vlen - 1)
+    end
+    res[key] = val
+    ::continue::
+  end
+  f:close()
+  return res
 end
 
 return M
