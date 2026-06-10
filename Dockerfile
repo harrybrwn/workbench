@@ -27,6 +27,9 @@ RUN set -eux; \
     rm /tmp/go${GO_VERSION}.linux-amd64.tar.gz; \
     rm /rustup-init;
 
+FROM debian_base AS debian
+ENTRYPOINT [ "bash" ]
+
 #
 # Pax
 #
@@ -58,7 +61,7 @@ RUN --mount=type=ssh \
         git@github.com:harrybrwn/pax.git /opt/pax
 WORKDIR /opt/pax/
 RUN --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
-    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
+    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry-${DEBIAN_VERSION} \
     --mount=type=cache,target=/usr/local/cargo/git/db \
     --mount=type=cache,target=/opt/pax/target,id=pax-target-${RUST_VERSION}-${DEBIAN_VERSION} \
     cargo build --release && \
@@ -88,6 +91,7 @@ RUN /usr/local/bin/pax --config ./test.lua
 # builder
 #
 FROM debian_base AS builder
+ARG TARGETARCH
 ARG RUST_VERSION
 ARG DEBIAN_VERSION
 ARG GO_VERSION
@@ -141,7 +145,7 @@ RUN --mount=type=ssh \
         git@github.com:harrybrwn/pax.git /opt/pax
 WORKDIR /opt/pax/
 RUN --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
-    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
+    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry-${DEBIAN_VERSION} \
     --mount=type=cache,target=/usr/local/cargo/git/db \
     --mount=type=cache,target=/opt/pax/target,id=pax-target-${RUST_VERSION}-${DEBIAN_VERSION} \
     cargo build --release && \

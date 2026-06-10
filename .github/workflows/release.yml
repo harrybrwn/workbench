@@ -38,7 +38,7 @@ jobs:
           BUILDX_BAKE_ENTITLEMENTS_FS: "0"
           VERSION: ${{ inputs.version }}
         run: |
-          docker buildx bake --allow=ssh workbench-dist
+          docker buildx bake --progress plain --allow=ssh workbench-dist
       - name: Create Default Asset
         run: |
           cp docker-build/workbench*_bookworm_amd64.deb docker-build/workbench_amd64.deb

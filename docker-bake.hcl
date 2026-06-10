@@ -96,7 +96,7 @@ target "test" {
     tags    = ["workbench-test"]
     ssh     = ["default"]
     args    = args({
-      DEBIAN_VERSION = "bookworm"
+      DEBIAN_VERSION = "trixie"
     })
 }
 
@@ -106,4 +106,12 @@ target "builder" {
     tags    = ["workbench-builder"]
     args    = args({})
     ssh     = ["default"]
+}
+
+target "debian" {
+  inherit = ["base"]
+  target  = "debian"
+  tags    = ["workbench-debian"]
+  args    = args({})
+  ssh     = ["default"]
 }
