@@ -128,7 +128,7 @@ RUN \
     git config --global user.name 'Harry Brown'  && \
     git config --global user.email me@h3y.sh
 
-# RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
+# RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry-${DEBIAN_VERSION} \
 #     --mount=type=cache,target=/usr/local/cargo/git/db \
 #     cargo install sccache
 #ENV RUSTC_WRAPPER="/usr/local/cargo/bin/sccache"
@@ -158,7 +158,7 @@ COPY README.md .
 COPY scripts scripts
 RUN --mount=type=ssh \
     --mount=type=cache,target=/opt/sccache/${RUST_VERSION} \
-    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry \
+    --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-${RUST_VERSION}-registry-${DEBIAN_VERSION} \
     --mount=type=cache,target=/usr/local/cargo/git/db      \
     --mount=type=cache,target=/var/cache/go                \
     --mount=type=cache,target=/opt/workbench/.pax/repos,id=pax-repos-${DEBIAN_VERSION} \
