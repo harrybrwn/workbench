@@ -19,13 +19,13 @@ jobs:
     name: release
     runs-on: ubuntu-latest
     steps:
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
       - name: Checkout Code
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.version }}
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
       - name: Set up QEMU
         id: qemu
         uses: docker/setup-qemu-action@v4
@@ -38,7 +38,6 @@ jobs:
           BUILDX_BAKE_ENTITLEMENTS_FS: "0"
           VERSION: ${{ inputs.version }}
         run: |
-          ssh -T git@github.com || true
           docker buildx bake --allow=ssh workbench-dist
       - name: Create Default Asset
         run: |

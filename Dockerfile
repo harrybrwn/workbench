@@ -43,8 +43,8 @@ RUN set -eux; \
     if [ ${DEBIAN_VERSION} = 'bookworm' ]; then \
         apt install -y zlib1g-dev; \
     fi; \
-	mkdir -p -m 0700 ~/.ssh; \
-	ssh-keyscan github.com >> ~/.ssh/known_hosts
+    mkdir -p -m 0700 ~/.ssh; \
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
 ENV SCCACHE_DIR=/opt/sccache/${RUST_VERSION} \
     SCCACHE_CACHE_SIZE="2G" \
     GOCACHE="/var/cache/go/build" \
@@ -119,8 +119,8 @@ RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     python3
 
 RUN \
-	mkdir -p -m 0700 ~/.ssh && \
-	ssh-keyscan github.com >> ~/.ssh/known_hosts && \
+    mkdir -p -m 0700 ~/.ssh && \
+    ssh-keyscan github.com >> ~/.ssh/known_hosts && \
     git config --global user.name 'Harry Brown'  && \
     git config --global user.email me@h3y.sh
 

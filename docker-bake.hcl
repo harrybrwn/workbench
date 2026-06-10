@@ -53,7 +53,7 @@ target "workbench" {
             },
         ]
     }
-    name       = "workbench_${replace(RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
+    name       = "workbench_${item.DEBIAN_VERSION}"
     inherit    = ["base"]
     tags       = [
         "harrybrwn/workbench:${VERSION}-${item.DEBIAN_VERSION}"
@@ -67,7 +67,6 @@ target "workbench" {
 target "workbench-dist" {
     matrix = {
         item = [
-            # { RUST_VERSION = "1.84.0-bullseye", DEBIAN_VERSION = "bullseye" },
             {
               DEBIAN_VERSION = "bookworm"
             },
@@ -76,7 +75,7 @@ target "workbench-dist" {
             },
         ]
     }
-    name    = "workbench-dist_${replace(RUST_VERSION, ".", "-")}_${item.DEBIAN_VERSION}"
+    name    = "workbench-dist_${item.DEBIAN_VERSION}"
     inherit = ["base"]
     ssh     = ["default"]
     tags    = [
